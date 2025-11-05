@@ -1,0 +1,102 @@
+<div class="max-w-2xl mx-auto px-6 py-8">
+  <div class="mb-8">
+    <%= link_to "← Back to Conversations", [@course_material, :conversations], 
+        class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+  
+  <div class="bg-white rounded-lg shadow-md border">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h1 class="text-2xl font-bold text-gray-900">Start New Evaluation</h1>
+      <p class="text-sm text-gray-600 mt-1">Begin an interactive evaluation session</p>
+    </div>
+    
+    <div class="p-6">
+      <%= form_with model: [@course_material, @conversation], local: true, class: "space-y-6" do |form| %>
+        <% if @conversation.errors.any? %>
+          <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">Please correct the following errors:</h3>
+                <ul class="mt-2 text-sm text-red-700 list-disc list-inside">
+                  <% @conversation.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        
+        <div class="space-y-4">
+          <h3 class="text-lg font-medium text-gray-900">Student Information</h3>
+          
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex">
+              <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                </svg>
+              </div>
+              <div class="ml-3 text-sm">
+                <p class="text-blue-800">Choose an existing student or create a new one for this evaluation session.</p>
+              </div>
+            </div>
+          </div>
+          
+          <% if @students.any? %>
+            <div>
+              <%= form.label :existing_student_id, "Select Existing Student", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.select :existing_student_id, 
+                  options_from_collection_for_select(@students, :id, :name, nil),
+                  { prompt: "Choose a student..." },
+                  { class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" } %>
+            </div>
+            
+            <div class="flex items-center">
+              <div class="flex-1 border-t border-gray-300"></div>
+              <div class="px-3 text-sm text-gray-500">OR</div>
+              <div class="flex-1 border-t border-gray-300"></div>
+            </div>
+          <% end %>
+          
+          <div class="grid gap-4 md:grid-cols-2">
+            <div>
+              <%= form.label :student_name, "Student Name", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.text_field :student_name, 
+                  class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", 
+                  placeholder: "Enter student's full name" %>
+            </div>
+            
+            <div>
+              <%= form.label :student_email, "Student Email", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.email_field :student_email, 
+                  class: "w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500", 
+                  placeholder: "student@example.com" %>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h4 class="font-medium text-gray-900 mb-2">Evaluation Overview</h4>
+          <div class="text-sm text-gray-600 space-y-1">
+            <div><strong>Course Material:</strong> <%= @course_material.title %></div>
+            <div><strong>Available Rubrics:</strong> <%= @course_material.rubrics.count %> concepts</div>
+            <div><strong>Evaluation Type:</strong> Interactive conversational assessment</div>
+          </div>
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+          <%= link_to "Cancel", [@course_material, :conversations], 
+              class: "px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors" %>
+          <%= form.submit "Start Evaluation", 
+              class: "px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

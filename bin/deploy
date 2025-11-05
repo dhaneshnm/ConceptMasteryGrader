@@ -1,0 +1,72 @@
+#!/bin/bash
+# Production deployment script for Grader I2
+set -e
+
+echo "🚀 Starting Grader I2 production deployment..."
+
+# Check if required environment variables are set
+required_vars=(
+    "DATABASE_URL"
+    "REDIS_URL" 
+    "SECRET_KEY_BASE"
+    "RAILS_MASTER_KEY"
+    "OPENAI_API_KEY"
+)
+
+for var in "${required_vars[@]}"; do
+    if [ -z "${!var}" ]; then
+        echo "❌ Error: Required environment variable $var is not set"
+        exit 1
+    fi
+done
+
+echo "✅ Environment variables validated"
+
+# Install dependencies
+echo "📦 Installing dependencies..."
+bundle install --deployment --without development test
+npm ci --only=production
+
+# Setup database
+echo "🗄️ Setting up database..."
+bundle exec rails db:prepare RAILS_ENV=production
+bundle exec rails db:migrate RAILS_ENV=production
+
+# Precompile assets
+echo "🎨 Precompiling assets..."
+bundle exec rails assets:precompile RAILS_ENV=production
+
+# Run security check
+echo "🔒 Running security checks..."
+if command -v brakeman &> /dev/null; then
+    bundle exec brakeman -q --no-pager
+else
+    echo "⚠️  Brakeman not installed, skipping security scan"
+fi
+
+# Verify configuration
+echo "🔧 Verifying configuration..."
+bundle exec rails runner "Rails.application.eager_load!" RAILS_ENV=production
+
+echo "✅ Deployment preparation completed successfully!"
+
+# Start services based on process type
+case "${PROCESS_TYPE:-web}" in
+    "web")
+        echo "🌐 Starting web server..."
+        exec bundle exec rails server -b 0.0.0.0 -p ${PORT:-3000} -e production
+        ;;
+    "worker")
+        echo "⚙️ Starting background worker..."
+        exec bundle exec sidekiq -c ${SIDEKIQ_CONCURRENCY:-5}
+        ;;
+    "release")
+        echo "🔄 Running release tasks..."
+        bundle exec rails db:migrate RAILS_ENV=production
+        echo "Release tasks completed"
+        ;;
+    *)
+        echo "❌ Unknown process type: ${PROCESS_TYPE}"
+        exit 1
+        ;;
+esac

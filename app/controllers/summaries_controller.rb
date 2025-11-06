@@ -3,6 +3,11 @@ class SummariesController < ApplicationController
   before_action :set_course_material
   before_action :set_summary, only: [:show]
   
+  # GET /course_materials/1/summaries
+  def index
+    @summaries = [@course_material.summary].compact
+  end
+  
   # GET /course_materials/1/summary
   def show
     unless @summary

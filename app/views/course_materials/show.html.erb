@@ -1,53 +1,55 @@
-<div class="max-w-4xl mx-auto px-6 py-8">
+<div class="space-y-8">
   <div class="mb-8">
     <%= link_to "← Back to Materials", course_materials_path, 
-        class: "text-blue-600 hover:text-blue-800 font-medium" %>
+        class: "nav-link text-lg" %>
   </div>
   
-  <div class="bg-white rounded-lg shadow-md border">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h1 class="text-2xl font-bold text-gray-900"><%= @course_material.title %></h1>
-      <div class="mt-2 flex items-center space-x-4 text-sm text-gray-600">
+  <div class="card">
+    <div class="card-header">
+      <h1 class="text-3xl font-bold text-neutral-800"><%= @course_material.title %></h1>
+      <div class="mt-3 flex items-center space-x-6 text-sm text-neutral-600">
         <span>Uploaded <%= @course_material.created_at.strftime("%B %d, %Y at %I:%M %p") %></span>
-        <span class="<%= status_badge_class(@processing_status) %> px-2 py-1 text-xs font-medium rounded-full">
+        <span class="status-badge <%= status_badge_class(@processing_status) %>">
           <%= @processing_status.humanize %>
         </span>
       </div>
     </div>
     
-    <div class="p-6">
+    <div class="card-body">
       <% if @course_material.uploaded? %>
-        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+        <div class="alert alert-warning mb-8">
           <div class="flex items-center">
             <div class="flex-shrink-0">
-              <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+              <svg class="h-6 w-6 text-secondary-600" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
               </svg>
             </div>
-            <div class="ml-3">
-              <h3 class="text-sm font-medium text-yellow-800">Processing in Progress</h3>
-              <p class="mt-1 text-sm text-yellow-700">
+            <div class="ml-4">
+              <h3 class="text-lg font-medium text-secondary-800">Processing in Progress</h3>
+              <p class="mt-2 text-secondary-700">
                 Your document is being processed. Text extraction and chunking are in progress.
+                <span class="spinner inline-block ml-2"></span>
               </p>
             </div>
           </div>
         </div>
       <% end %>
       
-      <div class="grid gap-6 md:grid-cols-3">
-        <div class="bg-gray-50 rounded-lg p-4">
-          <h3 class="font-semibold text-gray-900 mb-2">File Information</h3>
-          <div class="space-y-2 text-sm text-gray-600">
-            <div class="flex justify-between">
-              <span>Format:</span>
-              <span>PDF</span>
-            </div>
-            <% if @course_material.file.attached? %>
-              <div class="flex justify-between">
-                <span>Size:</span>
-                <span><%= number_to_human_size(@course_material.file.byte_size) %></span>
+      <div class="grid-responsive">
+        <div class="card bg-neutral-50">
+          <div class="p-6">
+            <h3 class="text-lg font-semibold text-neutral-800 mb-4">File Information</h3>
+            <div class="space-y-3 text-sm text-neutral-600">
+              <div class="flex justify-between items-center">
+                <span class="font-medium">Format:</span>
+                <span class="text-neutral-800">PDF</span>
               </div>
-              <div class="mt-3">
+              <% if @course_material.file.attached? %>
+                <div class="flex justify-between items-center">
+                  <span class="font-medium">Size:</span>
+                  <span class="text-neutral-800"><%= number_to_human_size(@course_material.file.byte_size) %></span>
+                </div>
+                <div class="mt-4">
                 <%= link_to "Download File", @course_material.file, 
                     class: "text-blue-600 hover:text-blue-800 font-medium text-sm" %>
               </div>
@@ -94,13 +96,16 @@
       <% if @course_material.processed? %>
         <div class="mt-6 flex space-x-4">
           <% if @summary.blank? %>
-            <%= link_to "Generate Summary", generate_summary_course_material_path(@course_material), 
+            <%= link_to "Generate Summary", [@course_material, :summary], 
                 method: :post,
                 class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>
           <% else %>
             <%= link_to "View Summary", [@course_material, :summary], 
                 class: "bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>
           <% end %>
+          
+          <%= link_to "Manage Summaries", [@course_material, :summaries], 
+              class: "bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>
           
           <%= link_to "Start Evaluation", "#", 
               class: "bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>

@@ -53,6 +53,7 @@ class Instructor::MisconceptionPatternsController < Instructor::BaseController
   # POST /instructor/course_materials/1/misconception_patterns
   def create
     @misconception_pattern = @course_material.misconception_patterns.build(misconception_pattern_params)
+    process_array_fields(@misconception_pattern)
     
     respond_to do |format|
       if @misconception_pattern.save
@@ -91,6 +92,11 @@ class Instructor::MisconceptionPatternsController < Instructor::BaseController
   
   # PATCH/PUT /instructor/course_materials/1/misconception_patterns/1
   def update
+    # Process array fields before updating
+    if params[:misconception_pattern].present?
+      process_array_fields_from_params
+    end
+    
     respond_to do |format|
       if @misconception_pattern.update(misconception_pattern_params)
         format.turbo_stream do
@@ -171,6 +177,40 @@ class Instructor::MisconceptionPatternsController < Instructor::BaseController
   
   private
   
+  # Process text fields into arrays for new records
+  def process_array_fields(pattern)
+    if params[:misconception_pattern][:signal_phrases_text].present?
+      pattern.signal_phrases = params[:misconception_pattern][:signal_phrases_text]
+                                  .split("\n")
+                                  .map(&:strip)
+                                  .reject(&:blank?)
+    end
+    
+    if params[:misconception_pattern][:recommended_followups_text].present?
+      pattern.recommended_followups = params[:misconception_pattern][:recommended_followups_text]
+                                         .split("\n")
+                                         .map(&:strip)
+                                         .reject(&:blank?)
+    end
+  end
+  
+  # Process text fields into arrays for updates
+  def process_array_fields_from_params
+    if params[:misconception_pattern][:signal_phrases_text].present?
+      params[:misconception_pattern][:signal_phrases] = params[:misconception_pattern][:signal_phrases_text]
+                                                           .split("\n")
+                                                           .map(&:strip)
+                                                           .reject(&:blank?)
+    end
+    
+    if params[:misconception_pattern][:recommended_followups_text].present?
+      params[:misconception_pattern][:recommended_followups] = params[:misconception_pattern][:recommended_followups_text]
+                                                                  .split("\n")
+                                                                  .map(&:strip)
+                                                                  .reject(&:blank?)
+    end
+  end
+
   def set_course_material
     @course_material = CourseMaterial.find(params[:course_material_id])
   end
@@ -180,6 +220,6 @@ class Instructor::MisconceptionPatternsController < Instructor::BaseController
   end
   
   def misconception_pattern_params
-    params.require(:misconception_pattern).permit(:pattern, :description, :severity, :suggested_response)
+    params.require(:misconception_pattern).permit(:concept, :name, :severity, signal_phrases: [], recommended_followups: [])
   end
 end

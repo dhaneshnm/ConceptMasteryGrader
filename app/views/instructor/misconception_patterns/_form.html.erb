@@ -1,0 +1,95 @@
+<%= form_with(model: [course_material, misconception_pattern], 
+              url: misconception_pattern.persisted? ? 
+                   instructor_course_material_misconception_pattern_path(course_material, misconception_pattern) : 
+                   instructor_course_material_misconception_patterns_path(course_material),
+              data: { turbo: true }) do |form| %>
+  <% if misconception_pattern.errors.any? %>
+    <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <div class="ml-3">
+          <h3 class="text-sm font-medium text-red-800">
+            <%= pluralize(misconception_pattern.errors.count, "error") %> prohibited this pattern from being saved:
+          </h3>
+          <div class="mt-2 text-sm text-red-700">
+            <ul class="list-disc list-inside space-y-1">
+              <% misconception_pattern.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+    <!-- Name Field -->
+    <div class="sm:col-span-2">
+      <%= form.label :name, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.text_field :name, 
+                          placeholder: "e.g., Confusing mass and weight",
+                          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+    </div>
+
+    <!-- Concept Field -->
+    <div>
+      <%= form.label :concept, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.text_field :concept, 
+                          placeholder: "e.g., force, energy, momentum",
+                          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+    </div>
+
+    <!-- Severity Field -->
+    <div>
+      <%= form.label :severity, class: "block text-sm font-medium text-gray-700" %>
+      <%= form.select :severity, 
+                      options_for_select([
+                        ['Low', 'low'],
+                        ['Medium', 'medium'],
+                        ['High', 'high']
+                      ], misconception_pattern.severity),
+                      { prompt: 'Select severity' },
+                      { class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" } %>
+    </div>
+
+    <!-- Signal Phrases -->
+    <div class="sm:col-span-2">
+      <%= form.label :signal_phrases, "Signal Phrases (one per line)", class: "block text-sm font-medium text-gray-700" %>
+      <p class="mt-1 text-sm text-gray-500">Enter phrases that indicate this misconception, one per line</p>
+      <%= text_area_tag "misconception_pattern[signal_phrases_text]", 
+                        (misconception_pattern.signal_phrases || []).join("\n"),
+                        placeholder: "heavier objects fall faster\nmass and weight are the same\nair resistance doesn't matter",
+                        rows: 4,
+                        class: "mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+    </div>
+
+    <!-- Recommended Follow-ups -->
+    <div class="sm:col-span-2">
+      <%= form.label :recommended_followups, "Recommended Follow-up Questions (one per line)", class: "block text-sm font-medium text-gray-700" %>
+      <p class="mt-1 text-sm text-gray-500">Enter follow-up questions to help address this misconception, one per line</p>
+      <%= text_area_tag "misconception_pattern[recommended_followups_text]", 
+                        (misconception_pattern.recommended_followups || []).join("\n"),
+                        placeholder: "Can you explain the difference between mass and weight?\nWhat happens when objects of different masses are dropped in a vacuum?\nHow does air resistance affect falling objects?",
+                        rows: 4,
+                        class: "mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" %>
+    </div>
+  </div>
+
+  <!-- Form Actions -->
+  <div class="mt-6 flex items-center justify-end space-x-3">
+    <% unless misconception_pattern.persisted? %>
+      <button type="button" 
+              onclick="document.getElementById('new_pattern_form').classList.add('hidden')"
+              class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        Cancel
+      </button>
+    <% end %>
+    <%= form.submit (misconception_pattern.persisted? ? "Update Pattern" : "Create Pattern"),
+                    class: "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+  </div>
+<% end %>

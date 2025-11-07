@@ -58,6 +58,9 @@ gem "pgvector"
 # Pagination
 gem "kaminari"
 
+# Markdown parsing
+gem "redcarpet"
+
 # TailwindCSS for styling
 gem "tailwindcss-rails"
 

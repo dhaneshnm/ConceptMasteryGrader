@@ -16,24 +16,33 @@ class Documents::IngestionService
     @processed_chunks = 0
   end
   
-  # Process the course material: extract text, chunk, and generate embeddings
+  # Process the course material: extract text from all files, chunk, and generate embeddings
   def process!
     return false unless valid?
     
     load_course_material
-    return false unless course_material&.file&.attached?
+    return false unless course_material&.files&.attached?
     
     begin
-      # Extract text from PDF
-      extracted_text = extract_pdf_text
-      return false unless extracted_text
+      all_text_chunks = []
       
-      # Split into chunks  
-      chunks_data = create_text_chunks(extracted_text)
-      return false if chunks_data.empty?
+      # Process each uploaded file
+      course_material.files.each_with_index do |file, index|
+        Rails.logger.info "Processing file #{index + 1}/#{course_material.files.count}: #{file.filename}"
+        
+        # Extract text from PDF
+        extracted_text = extract_pdf_text_from_file(file)
+        next unless extracted_text
+        
+        # Split into chunks with file identifier
+        chunks_data = create_text_chunks_from_file(extracted_text, file.filename.to_s, index)
+        all_text_chunks.concat(chunks_data) if chunks_data.any?
+      end
       
-      # Generate embeddings and save chunks
-      save_chunks_with_embeddings(chunks_data)
+      return false if all_text_chunks.empty?
+      
+      # Generate embeddings and save chunks for all files
+      save_chunks_with_embeddings(all_text_chunks)
       
       # Mark course material as processed
       course_material.mark_as_processed!
@@ -64,33 +73,64 @@ class Documents::IngestionService
       return false
     end
     
-    unless @course_material.file.attached?
-      add_error("No file attached to course material")
+    unless @course_material.files.attached? && @course_material.files.any?
+      add_error("No files attached to course material")
       return false
     end
     
     true
   end
   
-  def extract_pdf_text
+  def extract_pdf_text_from_file(file)
     # Download the file temporarily for processing
-    course_material.file.open do |tempfile|
+    file.open do |tempfile|
       processor = Documents::PdfProcessor.new(tempfile.path)
       text = processor.extract_text
       
       unless processor.success?
-        processor.errors.each { |error| add_error(error) }
+        processor.errors.each { |error| add_error("#{file.filename}: #{error}") }
         return nil
       end
       
       text
     end
   rescue StandardError => e
-    add_error("Failed to process PDF: #{e.message}")
+    add_error("Failed to process PDF #{file.filename}: #{e.message}")
     nil
   end
+
+  def extract_pdf_text
+    # Deprecated - kept for backward compatibility
+    # This method now processes the first file only
+    return nil unless course_material.files.attached? && course_material.files.any?
+    extract_pdf_text_from_file(course_material.files.first)
+  end
   
+  def create_text_chunks_from_file(text, filename, file_index)
+    chunker = Documents::TextChunker.new(text)
+    chunks = chunker.chunk!
+    
+    if chunks.empty?
+      add_error("No chunks could be created from the text in #{filename}")
+      return []
+    end
+    
+    # Add file metadata to each chunk
+    chunks_with_metadata = chunks.map.with_index do |chunk_text, chunk_index|
+      {
+        text: chunk_text,
+        filename: filename,
+        file_index: file_index,
+        chunk_index: chunk_index
+      }
+    end
+    
+    Rails.logger.info "Created #{chunks.size} chunks from file #{filename} in course material #{course_material_id}"
+    chunks_with_metadata
+  end
+
   def create_text_chunks(text)
+    # Deprecated - kept for backward compatibility
     chunker = Documents::TextChunker.new(text)
     chunks = chunker.chunk!
     
@@ -104,8 +144,12 @@ class Documents::IngestionService
   end
   
   def save_chunks_with_embeddings(chunks_data)
-    chunks_data.each_with_index do |chunk_text, index|
+    chunks_data.each_with_index do |chunk_data, index|
       begin
+        # Handle both old string format and new hash format for backward compatibility
+        chunk_text = chunk_data.is_a?(Hash) ? chunk_data[:text] : chunk_data
+        filename = chunk_data.is_a?(Hash) ? chunk_data[:filename] : "unknown"
+        
         # Generate embedding using ruby_llm
         embedding = generate_embedding(chunk_text)
         next unless embedding
@@ -119,11 +163,12 @@ class Documents::IngestionService
         
         @processed_chunks += 1
         
-        Rails.logger.debug "Processed chunk #{index + 1}/#{chunks_data.size} for course material #{course_material_id}"
+        Rails.logger.debug "Processed chunk #{index + 1}/#{chunks_data.size} from #{filename} for course material #{course_material_id}"
         
       rescue StandardError => e
-        Rails.logger.error "Failed to process chunk #{index + 1}: #{e.message}"
-        add_error("Failed to process chunk #{index + 1}: #{e.message}")
+        error_msg = chunk_data.is_a?(Hash) ? "#{chunk_data[:filename]} chunk #{index + 1}" : "chunk #{index + 1}"
+        Rails.logger.error "Failed to process #{error_msg}: #{e.message}"
+        add_error("Failed to process #{error_msg}: #{e.message}")
       end
     end
     

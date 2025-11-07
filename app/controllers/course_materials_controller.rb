@@ -64,6 +64,6 @@ class CourseMaterialsController < ApplicationController
   end
   
   def course_material_params
-    params.require(:course_material).permit(:title, :file)
+    params.require(:course_material).permit(:title, files: [])
   end
 end

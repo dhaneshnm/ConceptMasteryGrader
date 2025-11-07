@@ -118,7 +118,7 @@
                                             data: { turbo_method: :post },
                                             class: "text-green-600 hover:text-green-800 text-sm font-medium bg-transparent border-none p-0" %>
                             <% else %>
-                              <%= link_to "Report", [conversation.course_material, conversation, conversation.grade_reports.latest],
+                              <%= link_to "Report", [conversation.course_material, conversation, conversation.grade_reports.order(created_at: :desc).first],
                                           class: "text-purple-600 hover:text-purple-800 text-sm font-medium" %>
                             <% end %>
                           </div>
@@ -182,7 +182,7 @@
           
           <!-- Pagination -->
           <div class="mt-6">
-            <%= paginate @conversations, theme: "twitter_bootstrap_4" %>
+            <%= paginate @conversations %>
           </div>
           
         <% else %>

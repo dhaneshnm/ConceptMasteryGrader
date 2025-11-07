@@ -1,7 +1,6 @@
-<%= form_with model: [conversation, message], 
+<%= form_with model: [conversation.course_material, conversation, message], 
     data: { 
       chat_target: "form",
-      turbo_frame: "message_form",
       action: "submit->chat#submit turbo:submit-end->chat#reset"
     },
     class: "flex space-x-3" do |form| %>

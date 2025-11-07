@@ -16,6 +16,8 @@ class Message < ApplicationRecord
   scope :assistant_messages, -> { where(role: 'assistant') }
   scope :system_messages, -> { where(role: 'system') }
   scope :chronological, -> { order(:created_at) }
+  scope :from_user, -> { where(role: 'user') }
+  scope :from_assistant, -> { where(role: 'assistant') }
   
   # Check if message is from student
   def from_user?
@@ -38,5 +40,36 @@ class Message < ApplicationRecord
       role: role,
       content: content
     }
+  end
+
+  # Format content for display (could add markdown parsing later)
+  def formatted_content
+    content
+  end
+
+  # Get sender display name
+  def sender_name
+    case role
+    when "user"
+      conversation&.student&.name || "Student"
+    when "assistant"
+      "AI Tutor"
+    else
+      "Unknown"
+    end
+  end
+
+  # Get CSS classes for message styling
+  def message_classes
+    base_classes = "message p-4 rounded-lg max-w-3xl"
+    
+    case role
+    when "user"
+      "#{base_classes} bg-blue-50 border border-blue-200 ml-auto"
+    when "assistant"
+      "#{base_classes} bg-gray-50 border border-gray-200 mr-auto"
+    else
+      "#{base_classes} bg-gray-100"
+    end
   end
 end

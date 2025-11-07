@@ -1,39 +1,31 @@
 # Controller for managing chat messages with Turbo Streams support.
 class MessagesController < ApplicationController
   before_action :set_conversation
-  before_action :set_message, only: [:show, :destroy]
+  before_action :set_message, only: [:destroy]
   
   # POST /conversations/1/messages
   def create
     @message = @conversation.messages.build(message_params)
     
+    Rails.logger.info "Creating message: #{@message.attributes.inspect}"
+    Rails.logger.info "Message valid? #{@message.valid?}"
+    Rails.logger.info "Message errors: #{@message.errors.full_messages}" unless @message.valid?
+    
     respond_to do |format|
       if @message.save
+        Rails.logger.info "Message saved successfully with ID: #{@message.id}"
+        
         # Trigger AI response generation in background only for user messages
         if @message.from_user?
           EvaluatorResponseJob.perform_later(@conversation.id, @message.id)
         end
         
-        format.turbo_stream do
-          streams = [
-            turbo_stream.append("messages", partial: "messages/message", locals: { message: @message }),
-            turbo_stream.replace("message_form", partial: "messages/form", locals: { 
-              conversation: @conversation, 
-              message: @conversation.messages.build 
-            })
-          ]
-          
-          # Add typing indicator only for user messages
-          if @message.from_user?
-            streams << turbo_stream.update("typing_indicator", 
-              content: "<div class='flex items-center text-gray-500 text-sm py-2'><div class='typing-dots mr-2'><span></span><span></span><span></span></div>AI is thinking...</div>"
-            )
-          end
-          
-          render turbo_stream: streams
-        end
+        format.turbo_stream
+        # The turbo_stream template handles the rendering
         format.html { redirect_to [@conversation.course_material, @conversation] }
       else
+        Rails.logger.error "Failed to save message: #{@message.errors.full_messages}"
+        
         format.turbo_stream do
           render turbo_stream: turbo_stream.replace("message_form", partial: "messages/form", locals: {
             conversation: @conversation,

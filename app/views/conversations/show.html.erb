@@ -30,14 +30,14 @@
             <h3 class="font-medium text-gray-900 mb-2">Evaluation</h3>
             <p class="text-sm text-gray-600 mb-3">Generate an AI assessment of this conversation.</p>
             
-            <% if @conversation.messages.from_user.count >= 2 && @conversation.course_material.rubrics.exists? %>
+            <% if @conversation.messages.user_messages.count >= 2 && @conversation.course_material.rubrics.exists? %>
               <%= button_to "Start Evaluation", [@conversation.course_material, @conversation, :grade_reports],
                             method: :post,
                             data: { turbo_method: :post },
                             class: "w-full text-sm bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
             <% else %>
               <div class="text-xs text-gray-500 bg-gray-50 rounded p-2">
-                <% unless @conversation.messages.from_user.count >= 2 %>
+                <% unless @conversation.messages.user_messages.count >= 2 %>
                   <p>• Need at least 2 student messages</p>
                 <% end %>
                 <% unless @conversation.course_material.rubrics.exists? %>
@@ -111,7 +111,7 @@
             <!-- Welcome message -->
             <div class="flex justify-start">
               <div class="max-w-xs lg:max-w-md">
-                <div class="bg-blue-600 text-white rounded-lg px-4 py-2">
+                <div class="bg-white border border-neutral-200 text-neutral-800 shadow-sm rounded-lg px-4 py-2">
                   <p class="text-sm">
                     Hello <%= @conversation.student.name.split.first %>! I'm here to evaluate your understanding of the course material. 
                     Let's start with a discussion about the key concepts. What would you like to explore first?

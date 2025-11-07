@@ -24,6 +24,6 @@ class Instructor::BaseController < ApplicationController
   def accessible_course_materials
     # For demo, return all course materials
     # In production, filter by instructor permissions
-    CourseMaterial.includes(:conversations, :rubrics, :summaries, :misconception_patterns)
+    CourseMaterial.includes(:conversations, :rubrics, :summary, :misconception_patterns)
   end
 end

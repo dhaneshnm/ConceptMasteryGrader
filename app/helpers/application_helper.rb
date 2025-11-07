@@ -2,9 +2,9 @@ module ApplicationHelper
   # Message bubble styling based on message sender
   def message_bubble_class(message)
     if message.from_user?
-      "bg-primary-600 text-white"
+      "bg-white text-blue shadow-sm"
     else
-      "bg-neutral-100 text-neutral-800"
+      "bg-white border border-neutral-200 text-neutral-800 shadow-sm"
     end
   end
   

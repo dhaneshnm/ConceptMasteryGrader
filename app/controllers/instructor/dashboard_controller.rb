@@ -14,36 +14,6 @@ class Instructor::DashboardController < Instructor::BaseController
     end
   end
   
-  # GET /instructor/conversations
-  def conversations
-    @course_material = CourseMaterial.find(params[:course_material_id]) if params[:course_material_id].present?
-    
-    conversations_query = @course_material ? @course_material.conversations : Conversation.all
-    
-    @conversations = conversations_query
-                      .includes(:student, :course_material, :grade_reports, :messages)
-                      .order(updated_at: :desc)
-                      .page(params[:page])
-                      .per(20)
-    
-    # Filter options
-    if params[:status].present?
-      case params[:status]
-      when 'evaluated'
-        @conversations = @conversations.joins(:grade_reports).distinct
-      when 'pending'
-        @conversations = @conversations.left_joins(:grade_reports).where(grade_reports: { id: nil })
-      when 'needs_attention'
-        @conversations = @conversations.joins(:grade_reports).where('grade_reports.overall_score < 0.5')
-      end
-    end
-    
-    respond_to do |format|
-      format.html
-      format.turbo_stream
-    end
-  end
-  
   # GET /instructor/analytics
   def analytics
     @course_material = CourseMaterial.find(params[:course_material_id]) if params[:course_material_id].present?
@@ -125,8 +95,8 @@ class Instructor::DashboardController < Instructor::BaseController
   
   def recent_evaluations
     GradeReport.includes(conversation: [:student, :course_material])
-              .where(evaluated_at: 1.week.ago..)
-              .order(evaluated_at: :desc)
+              .where(created_at: 1.week.ago..)
+              .order(created_at: :desc)
   end
   
   def dashboard_statistics
@@ -221,7 +191,7 @@ class Instructor::DashboardController < Instructor::BaseController
                                       .select { |_, reports| reports.size > 1 }
     
     improvements = conversation_reports.map do |_, reports|
-      sorted_reports = reports.sort_by(&:evaluated_at)
+      sorted_reports = reports.sort_by(&:created_at)
       first_score = sorted_reports.first.overall_score
       last_score = sorted_reports.last.overall_score
       last_score - first_score

@@ -4,8 +4,8 @@
     <h2 class="text-2xl font-bold text-gray-900">Grade Report</h2>
     <div class="flex items-center space-x-2 text-sm text-gray-500">
       <span>Generated:</span>
-      <time datetime="<%= @grade_report.evaluated_at&.iso8601 %>">
-        <%= @grade_report.evaluated_at&.strftime("%B %d, %Y at %I:%M %p") %>
+      <time datetime="<%= @grade_report.created_at&.iso8601 %>">
+        <%= @grade_report.created_at&.strftime("%B %d, %Y at %I:%M %p") %>
       </time>
     </div>
   </div>

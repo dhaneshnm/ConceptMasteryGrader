@@ -6,6 +6,7 @@ export default class extends Controller {
   static values = { autoScroll: { type: Boolean, default: true } }
   
   connect() {
+    console.log("Chat controller connected")
     this.scrollToBottom()
     
     // Auto-focus input when controller connects
@@ -15,6 +16,23 @@ export default class extends Controller {
     
     // Listen for new messages to auto-scroll
     this.element.addEventListener("turbo:before-stream-render", this.beforeStreamRender.bind(this))
+    
+    // Debug Turbo events
+    this.element.addEventListener("turbo:submit-start", (event) => {
+      console.log("Turbo submit start:", event.detail)
+    })
+    
+    this.element.addEventListener("turbo:submit-end", (event) => {
+      console.log("Turbo submit end:", event.detail)
+    })
+    
+    this.element.addEventListener("turbo:before-fetch-request", (event) => {
+      console.log("Turbo before fetch request:", event.detail)
+    })
+    
+    this.element.addEventListener("turbo:before-fetch-response", (event) => {
+      console.log("Turbo before fetch response:", event.detail)
+    })
   }
   
   disconnect() {
@@ -23,12 +41,18 @@ export default class extends Controller {
   
   // Handle form submission
   submit(event) {
+    console.log("Chat controller: Form submission intercepted", event)
+    console.log("Event target:", event.target)
+    
     const content = this.inputTarget.value.trim()
     
     if (!content) {
+      console.log("Chat controller: Preventing empty submission")
       event.preventDefault()
       return
     }
+    
+    console.log("Chat controller: Submitting message:", content)
     
     // Disable submit button to prevent double submission
     if (this.hasSubmitButtonTarget) {
@@ -79,6 +103,8 @@ export default class extends Controller {
   
   // Reset form after successful submission
   reset() {
+    console.log("Chat controller: Resetting form after successful submission")
+    
     if (this.hasInputTarget) {
       this.inputTarget.value = ""
       this.inputTarget.focus()

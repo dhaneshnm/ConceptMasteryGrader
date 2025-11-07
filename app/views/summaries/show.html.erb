@@ -60,9 +60,10 @@
           <p class="text-sm text-purple-700 mb-3">
             Create assessment rubrics based on the key concepts identified in this summary.
           </p>
-          <%= link_to "Generate Rubrics", generate_course_material_rubrics_path(@course_material), 
-              method: :post,
-              class: "text-sm bg-purple-600 hover:bg-purple-700 text-white font-medium py-1 px-3 rounded transition-colors" %>
+          <%= form_with url: generate_course_material_rubrics_path(@course_material), method: :post, local: true, class: "inline-block" do |form| %>
+            <%= form.submit "Generate Rubrics", 
+                class: "text-sm bg-purple-600 hover:bg-purple-700 text-white font-medium py-1 px-3 rounded transition-colors cursor-pointer" %>
+          <% end %>
         </div>
         
         <div class="bg-green-50 rounded-lg p-4 border border-green-200">

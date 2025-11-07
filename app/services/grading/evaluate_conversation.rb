@@ -272,23 +272,16 @@ class Grading::EvaluateConversation
   end
   
   def create_grade_report(concept_evaluations, overall_assessment, conversation_analysis)
-    # Build detailed scores hash
-    detailed_scores = concept_evaluations.transform_values do |evaluation|
-      {
-        score: evaluation[:score],
-        level: evaluation[:level],
-        evidence: evaluation[:evidence],
-        feedback: evaluation[:feedback]
-      }
+    # Build scores hash with just the level strings for validation
+    scores = concept_evaluations.transform_values do |evaluation|
+      evaluation[:level]
     end
     
     # Create grade report record
-    report = conversation.build_grade_report(
+    report = conversation.grade_reports.build(
       overall_score: overall_assessment[:overall_score],
-      detailed_scores: detailed_scores,
-      feedback: generate_comprehensive_feedback(overall_assessment, conversation_analysis),
-      recommendations: overall_assessment[:recommendations],
-      evaluated_at: Time.current
+      scores: scores,
+      feedback: generate_comprehensive_feedback(overall_assessment, conversation_analysis)
     )
     
     if report.save
@@ -384,9 +377,11 @@ class Grading::EvaluateConversation
       - Progression trend: #{conversation_analysis[:progression][:trend]}
       - Evidence strength: #{evidence[:evidence_strength]} relevant messages
 
-      Provide JSON evaluation:
+      IMPORTANT: You must respond with ONLY valid JSON. Do not include any text before or after the JSON.
+
+      Required JSON format:
       {
-        "level": "novice|developing|proficient|advanced",
+        "level": "beginner|developing|proficient|mastery",
         "score": 0.75,
         "evidence": "Key evidence from responses...",
         "feedback": "Specific feedback on understanding...",
@@ -407,7 +402,9 @@ class Grading::EvaluateConversation
   end
   
   def parse_concept_evaluation(response, rubric)
-    parsed = JSON.parse(response.strip)
+    # Try to extract JSON from response if it contains extra text
+    json_text = extract_json_from_response(response)
+    parsed = JSON.parse(json_text.strip)
     
     {
       rubric_id: rubric.id,
@@ -420,6 +417,7 @@ class Grading::EvaluateConversation
     }
   rescue JSON::ParserError => e
     Rails.logger.error "Failed to parse concept evaluation: #{e.message}"
+    Rails.logger.error "Raw response: #{response}"
     {
       rubric_id: rubric.id,
       concept: rubric.concept,
@@ -430,13 +428,26 @@ class Grading::EvaluateConversation
       confidence: 0.0
     }
   end
+
+  def extract_json_from_response(response)
+    # Look for JSON object in the response
+    json_match = response.match(/\{.*?\}/m)
+    return json_match[0] if json_match
+
+    # If no JSON found, try to extract from code blocks
+    code_block_match = response.match(/```(?:json)?\s*(\{.*?\})\s*```/m)
+    return code_block_match[1] if code_block_match
+
+    # If still no match, return original response
+    response
+  end
   
   def convert_level_to_score(level)
     case level&.downcase
-    when "advanced" then 0.95
+    when "mastery" then 0.95
     when "proficient" then 0.75
     when "developing" then 0.55
-    when "novice" then 0.25
+    when "beginner" then 0.25
     else 0.0
     end
   end

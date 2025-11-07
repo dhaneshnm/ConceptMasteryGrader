@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Grader I2" %></title>
+    <title><%= content_for(:title) || "Concept Mastery Grader" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Grader I2">
+    <meta name="application-name" content="Concept Mastery Grader">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -33,7 +33,7 @@
               <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span class="text-white font-bold text-sm">G</span>
               </div>
-              <%= link_to "Grader I2", root_path, class: "text-xl font-bold text-neutral-800 hover:text-primary-700 transition-colors" %>
+              <%= link_to "Concept Mastery Grader", root_path, class: "text-xl font-bold text-neutral-800 hover:text-primary-700 transition-colors" %>
             </div>
             
             <nav class="hidden md:flex space-x-6">
@@ -76,10 +76,10 @@
             <div class="w-6 h-6 bg-primary-600 rounded flex items-center justify-center">
               <span class="text-white font-bold text-xs">G</span>
             </div>
-            <span class="text-neutral-600 text-sm">Grader I2 - Intelligent Assessment Platform</span>
+            <span class="text-neutral-600 text-sm">Concept Mastery Grader - Intelligent Assessment Platform</span>
           </div>
           <div class="text-sm text-neutral-500">
-            © <%= Date.current.year %> Grader I2. Built with care for educators.
+            © <%= Date.current.year %> Concept Mastery Grader. Built with care for educators.
           </div>
         </div>
       </div>

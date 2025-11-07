@@ -1,7 +1,7 @@
 # Controller for managing course material summaries.
 class SummariesController < ApplicationController
   before_action :set_course_material
-  before_action :set_summary, only: [:show]
+  before_action :set_summary, only: [:show, :destroy]
   
   # GET /course_materials/1/summaries
   def index

@@ -140,21 +140,15 @@ class Summaries::Generate
       "--- Chunk #{index + 1} ---\n#{chunk.text.strip}"
     end.join("\n\n")
     
-    # Generate summary using LLM
-    messages = [
-      {
-        role: "system", 
-        content: build_system_prompt
-      },
-      {
-        role: "user",
-        content: build_user_prompt(chunks_context)
-      }
-    ]
-    
     Rails.logger.info "Generating summary for course material #{course_material_id} using #{chunks.size} chunks"
     
-    response = LLM.chat(messages: messages)
+    # Generate summary using LLM
+    chat = LLM.chat
+    chat.add_message(role: "system", content: build_system_prompt)
+    chat.add_message(role: "user", content: build_user_prompt(chunks_context))
+    
+    result = chat.complete
+    response = result.content
     
     if response && response.strip.present?
       Rails.logger.info "Successfully generated summary (#{response.length} characters)"

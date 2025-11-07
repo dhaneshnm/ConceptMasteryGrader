@@ -16,10 +16,13 @@ class Chunk < ApplicationRecord
   
   # Convert embedding array to pgvector format
   def self.create_with_embedding(course_material:, text:, embedding_array:)
+    # Convert array to pgvector format - wrap in brackets and join with commas
+    embedding_string = "[#{embedding_array.join(',')}]"
+    
     create!(
       course_material: course_material,
       text: text,
-      embedding: embedding_array
+      embedding: embedding_string
     )
   end
   

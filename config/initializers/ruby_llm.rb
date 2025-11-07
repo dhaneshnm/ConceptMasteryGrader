@@ -2,10 +2,18 @@
 require 'ruby_llm'
 
 # Create LLM alias as specified in the plan
-LLM = RubyLLM
 
-LLM.config.default_model = "gpt-4.1"
+
 
 # Optional: Configure API keys via environment variables
 # LLM.config.openai_api_key = ENV["OPENAI_API_KEY"] 
 # LLM.config.anthropic_api_key = ENV["ANTHROPIC_API_KEY"]
+RubyLLM.configure do |config|
+  config.anthropic_api_key = Rails.application.credentials.dig(:anthropic, :api_key)
+  config.openai_api_key = Rails.application.credentials.dig(:openai_api_key)
+  config.default_model = "claude-3-5-haiku-20241022"
+  config.default_embedding_model = 'text-embedding-3-small'
+  config.use_new_acts_as = true
+end
+
+LLM = RubyLLM

@@ -42,7 +42,21 @@ Concept Mastery Grader transforms traditional educational assessment by using ad
 - **File Storage**: ActiveStorage with cloud storage support
 
 ## 🔄 System Architecture & Workflow
+## Simple Architecture Diagram
+```mermaid
+flowchart LR
 
+A[PDFs] --> B[Preprocessing\nExtract • Chunk • Embed] --> C[(Vector DB)]
+
+C --> D["Summary Generator (RAG)"] --> E["Rubric Builder (RAG)"] --> F[Interactive Chatbot]
+C <--> F
+
+F --> G[Chat Transcript + Evidence Tags] --> H["Grader (RAG-Evidence Based)"]
+C <--> H
+
+H --> I[Final Grade Report]
+```
+## Detailed Architecture Diagram
 ```mermaid
 graph TB
     %% User Interface Layer

@@ -1,0 +1,106 @@
+<div class="max-w-6xl mx-auto px-6 py-8">
+  <div class="mb-8">
+    <%= link_to "← Back to #{@course_material.title}", @course_material, 
+        class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+  
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Evaluation Sessions</h1>
+      <p class="text-gray-600 mt-1">Interactive student evaluations</p>
+    </div>
+    
+    <%= link_to "Start New Evaluation", new_course_material_conversation_path(@course_material), 
+        class: "bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>
+  </div>
+  
+  <% if @conversations.any? %>
+    <div class="bg-white rounded-lg shadow-md border overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="font-semibold text-gray-900">Recent Sessions</h2>
+      </div>
+      
+      <div class="divide-y divide-gray-200">
+        <% @conversations.each do |conversation| %>
+          <div class="p-6 hover:bg-gray-50 transition-colors">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="flex items-center space-x-3 mb-2">
+                  <h3 class="font-medium text-gray-900">
+                    <%= conversation.student.name %>
+                  </h3>
+                  <span class="text-sm text-gray-500">
+                    (<%= conversation.student.email %>)
+                  </span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                  <div>
+                    <span class="font-medium">Started:</span>
+                    <%= conversation.created_at.strftime("%b %d, %Y at %I:%M %p") %>
+                  </div>
+                  <div>
+                    <span class="font-medium">Messages:</span>
+                    <%= conversation.messages.count %>
+                  </div>
+                  <div>
+                    <span class="font-medium">Status:</span>
+                    <% if conversation.grade_reports.any? %>
+                      <span class="text-green-600">Evaluated</span>
+                    <% elsif conversation.messages.any? %>
+                      <span class="text-blue-600">In Progress</span>
+                    <% else %>
+                      <span class="text-gray-600">Not Started</span>
+                    <% end %>
+                  </div>
+                </div>
+                
+                <% if conversation.messages.any? %>
+                  <div class="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <p class="text-sm text-gray-700">
+                      <strong>Latest:</strong>
+                      <%= truncate(conversation.messages.last.content, length: 100) %>
+                    </p>
+                  </div>
+                <% end %>
+              </div>
+              
+              <div class="flex space-x-2 ml-4">
+                <%= link_to "Continue", [@course_material, conversation], 
+                    class: "bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-1 px-3 rounded text-sm transition-colors" %>
+                
+                <% if conversation.grade_reports.any? %>
+                  <%= link_to "View Report", "#", 
+                      class: "bg-green-100 hover:bg-green-200 text-green-800 font-medium py-1 px-3 rounded text-sm transition-colors" %>
+                <% end %>
+                
+                <%= link_to "Delete", [@course_material, conversation], 
+                    method: :delete,
+                    data: { confirm: "Are you sure? This will delete all messages." },
+                    class: "bg-red-100 hover:bg-red-200 text-red-800 font-medium py-1 px-3 rounded text-sm transition-colors" %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="mx-auto h-12 w-12 text-gray-400 mb-4">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.959 8.959 0 01-4.906-1.456L3 21l2.456-5.094A8.959 8.959 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No evaluation sessions yet</h3>
+      <p class="text-gray-500 mb-6">Start your first interactive student evaluation.</p>
+      
+      <% if @course_material.processed? %>
+        <%= link_to "Start Evaluation", new_course_material_conversation_path(@course_material), 
+            class: "bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>
+      <% else %>
+        <p class="text-sm text-gray-500">Course material must be processed before starting evaluations.</p>
+      <% end %>
+    </div>
+  <% end %>
+</div>

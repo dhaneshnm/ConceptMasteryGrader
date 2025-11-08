@@ -1,0 +1,131 @@
+<div class="max-w-6xl mx-auto px-6 py-8">
+  <div class="mb-8">
+    <%= link_to "← Back to #{@course_material.title}", @course_material, 
+        class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+  
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Assessment Rubrics</h1>
+      <p class="text-gray-600 mt-1">Detailed proficiency levels for key concepts</p>
+    </div>
+    
+    <% if @rubrics.empty? %>
+      <%= link_to "Generate Rubrics", generate_course_material_rubrics_path(@course_material), 
+          method: :post,
+          class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>
+    <% else %>
+      <%= link_to "Regenerate All", generate_course_material_rubrics_path(@course_material), 
+          method: :post,
+          data: { confirm: "This will replace all existing rubrics. Continue?" },
+          class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>
+    <% end %>
+  </div>
+  
+  <% if @rubrics.any? %>
+    <div class="grid gap-6">
+      <% @rubrics.each do |rubric| %>
+        <div class="bg-white rounded-lg shadow-md border">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+              <h3 class="text-lg font-semibold text-gray-900"><%= rubric.concept %></h3>
+              <div class="flex space-x-2">
+                <%= link_to "View Details", [@course_material, rubric], 
+                    class: "text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-1 px-3 rounded transition-colors" %>
+                <%= link_to "Edit", edit_course_material_rubric_path(@course_material, rubric), 
+                    class: "text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-1 px-3 rounded transition-colors" %>
+                <%= link_to "Delete", [@course_material, rubric], 
+                    method: :delete,
+                    data: { confirm: "Are you sure?" },
+                    class: "text-sm bg-red-100 hover:bg-red-200 text-red-800 font-medium py-1 px-3 rounded transition-colors" %>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-6">
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <% Rubric::EXPECTED_LEVELS.each do |level| %>
+                <div class="<%= level_card_class(level) %> rounded-lg p-4 border">
+                  <h4 class="font-medium <%= level_text_class(level) %> mb-2 capitalize">
+                    <%= level.humanize %>
+                  </h4>
+                  <p class="text-sm <%= level_description_class(level) %> leading-relaxed">
+                    <%= truncate(rubric.level_description(level), length: 120) %>
+                  </p>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-12">
+      <div class="mx-auto h-12 w-12 text-gray-400 mb-4">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No rubrics generated yet</h3>
+      <p class="text-gray-500 mb-6">Generate assessment rubrics to define proficiency levels for key concepts.</p>
+      
+      <% if @course_material.processed? %>
+        <%= link_to "Generate Rubrics", generate_course_material_rubrics_path(@course_material), 
+            method: :post,
+            class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>
+      <% else %>
+        <p class="text-sm text-gray-500">Course material must be processed before generating rubrics.</p>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<% content_for :helpers do %>
+  <%
+    def level_card_class(level)
+      case level.to_s
+      when 'beginner'
+        'bg-red-50 border-red-200'
+      when 'developing'
+        'bg-yellow-50 border-yellow-200'
+      when 'proficient'
+        'bg-blue-50 border-blue-200'
+      when 'mastery'
+        'bg-green-50 border-green-200'
+      else
+        'bg-gray-50 border-gray-200'
+      end
+    end
+    
+    def level_text_class(level)
+      case level.to_s
+      when 'beginner'
+        'text-red-900'
+      when 'developing'
+        'text-yellow-900'
+      when 'proficient'
+        'text-blue-900'
+      when 'mastery'
+        'text-green-900'
+      else
+        'text-gray-900'
+      end
+    end
+    
+    def level_description_class(level)
+      case level.to_s
+      when 'beginner'
+        'text-red-700'
+      when 'developing'
+        'text-yellow-700'
+      when 'proficient'
+        'text-blue-700'
+      when 'mastery'
+        'text-green-700'
+      else
+        'text-gray-700'
+      end
+    end
+  %>
+<% end %>

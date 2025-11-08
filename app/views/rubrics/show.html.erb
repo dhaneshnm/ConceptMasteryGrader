@@ -1,0 +1,120 @@
+<div class="max-w-4xl mx-auto px-6 py-8">
+  <div class="mb-8">
+    <%= link_to "← Back to Rubrics", [@course_material, :rubrics], 
+        class: "text-blue-600 hover:text-blue-800 font-medium" %>
+  </div>
+  
+  <div class="bg-white rounded-lg shadow-md border">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <div class="flex justify-between items-start">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900"><%= @rubric.concept %></h1>
+          <p class="text-sm text-gray-600 mt-1">Assessment Rubric</p>
+        </div>
+        <div class="flex space-x-2">
+          <%= link_to "Edit Rubric", edit_course_material_rubric_path(@course_material, @rubric), 
+              class: "text-sm bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium py-1 px-3 rounded transition-colors" %>
+          <%= link_to "Delete", [@course_material, @rubric], 
+              method: :delete,
+              data: { confirm: "Are you sure you want to delete this rubric?" },
+              class: "text-sm bg-red-100 hover:bg-red-200 text-red-800 font-medium py-1 px-3 rounded transition-colors" %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="p-6">
+      <div class="space-y-6">
+        <% Rubric::EXPECTED_LEVELS.each do |level| %>
+          <div class="<%= level_card_class(level) %> rounded-lg border">
+            <div class="px-4 py-3 border-b <%= level_border_class(level) %>">
+              <h3 class="font-semibold <%= level_text_class(level) %> text-lg capitalize">
+                <%= level.humanize %>
+              </h3>
+            </div>
+            <div class="p-4">
+              <p class="<%= level_description_class(level) %> leading-relaxed">
+                <%= @rubric.level_description(level) %>
+              </p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+      
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <h3 class="font-medium text-gray-900 mb-3">Usage Guidelines</h3>
+        <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-700">
+          <ul class="space-y-2">
+            <li>• Use this rubric to assess student understanding during interactive evaluations</li>
+            <li>• Look for indicators described in each level to determine proficiency</li>
+            <li>• Students may demonstrate mixed levels - use overall pattern for scoring</li>
+            <li>• Focus on conceptual understanding rather than memorization</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% content_for :helpers do %>
+  <%
+    def level_card_class(level)
+      case level.to_s
+      when 'beginner'
+        'bg-red-50'
+      when 'developing'
+        'bg-yellow-50'
+      when 'proficient'
+        'bg-blue-50'
+      when 'mastery'
+        'bg-green-50'
+      else
+        'bg-gray-50'
+      end
+    end
+    
+    def level_border_class(level)
+      case level.to_s
+      when 'beginner'
+        'border-red-200'
+      when 'developing'
+        'border-yellow-200'
+      when 'proficient'
+        'border-blue-200'
+      when 'mastery'
+        'border-green-200'
+      else
+        'border-gray-200'
+      end
+    end
+    
+    def level_text_class(level)
+      case level.to_s
+      when 'beginner'
+        'text-red-900'
+      when 'developing'
+        'text-yellow-900'
+      when 'proficient'
+        'text-blue-900'
+      when 'mastery'
+        'text-green-900'
+      else
+        'text-gray-900'
+      end
+    end
+    
+    def level_description_class(level)
+      case level.to_s
+      when 'beginner'
+        'text-red-700'
+      when 'developing'
+        'text-yellow-700'
+      when 'proficient'
+        'text-blue-700'
+      when 'mastery'
+        'text-green-700'
+      else
+        'text-gray-700'
+      end
+    end
+  %>
+<% end %>

@@ -1,0 +1,45 @@
+<%= form_with model: [conversation, message], 
+    data: { 
+      chat_target: "form",
+      turbo_frame: "message_form",
+      action: "submit->chat#submit turbo:submit-end->chat#reset"
+    },
+    class: "flex space-x-3" do |form| %>
+  
+  <%= form.hidden_field :role, value: "user" %>
+  
+  <div class="flex-1">
+    <%= form.text_area :content,
+        data: { 
+          chat_target: "input",
+          action: "input->chat#inputChanged keydown->chat#handleKeydown"
+        },
+        class: "w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none #{message.errors[:content].any? ? 'border-red-500' : ''}",
+        placeholder: "Type your response...",
+        rows: 1,
+        style: "min-height: 40px; max-height: 120px;",
+        required: true %>
+    
+    <% if message.errors[:content].any? %>
+      <p class="mt-1 text-sm text-red-600"><%= message.errors[:content].first %></p>
+    <% end %>
+  </div>
+  
+  <%= form.submit "Send", 
+      data: { chat_target: "submitButton" },
+      class: "bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium py-2 px-6 rounded-lg transition-colors",
+      disabled: true %>
+<% end %>
+
+<script>
+  // Auto-resize textarea
+  document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.querySelector('[data-chat-target="input"]');
+    if (textarea) {
+      textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      });
+    }
+  });
+</script>

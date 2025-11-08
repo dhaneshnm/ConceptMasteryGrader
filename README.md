@@ -58,140 +58,60 @@ H --> I[Final Grade Report]
 
 
 
-## Detsiled Architecture Diagram
+## Detailed Architecture Diagram
 ```mermaid
-graph TB
-    %% User Interface Layer
-    subgraph "Frontend Layer"
-        UI[Student Chat Interface]
-        ID[Instructor Dashboard]
-        UI2[Real-time Updates via Turbo Streams]
-    end
+graph LR
 
-    %% Application Layer
-    subgraph "Rails Application Layer"
-        subgraph "Controllers"
-            CC[ConversationsController]
-            MC[MessagesController]
-            CMC[CourseMaterialsController]
-            IDC[Instructor::DashboardController]
-        end
-        
-        subgraph "Models"
-            CM[CourseMaterial]
-            CONV[Conversation]
-            MSG[Message]
-            CHK[Chunk + Embeddings]
-            RUB[Rubric]
-            GR[GradeReport]
-        end
-    end
+%% UI
+Student[Student Chat UI]
+Instructor[Instructor Dashboard]
 
-    %% Service Layer
-    subgraph "AI Services Layer"
-        subgraph "Document Processing"
-            EXT[Documents::ExtractText]
-            CHUNK[Documents::GenerateChunks] 
-            EMB[Documents::GenerateEmbeddings]
-        end
-        
-        subgraph "AI Generation"
-            SUM[Summaries::Generate]
-            RUBGEN[Rubrics::Generate]
-            EVAL[Evaluator::ResponseGenerator]
-            GRADE[Grading::EvaluateConversation]
-        end
-    end
+%% App
+App["Rails App<br>(Controllers + Models)"]
 
-    %% Background Jobs
-    subgraph "Background Processing (Sidekiq)"
-        DIG[DocumentIngestionJob]
-        SGJ[SummaryGenerationJob]
-        RGJ[RubricGenerationJob]
-        ERJ[EvaluatorResponseJob]
-        CEJ[ConversationEvaluationJob]
-    end
+%% Doc Pipeline
+subgraph DocPipeline[Document Processing Pipeline]
+Extract[Extract Text]
+Chunk[Chunk + Embed]
+StoreVec[(pgvector DB)]
+end
 
-    %% External Services
-    subgraph "External Services"
-        LLM[LLM Providers<br/>OpenAI/Anthropic/Google]
-        STORAGE[File Storage<br/>ActiveStorage/S3]
-    end
+%% AI
+subgraph AI[AI Engines]
+Summarizer[Summary Engine]
+RubricGen[Rubric Engine]
+Responder[Conversation Response Engine]
+Grader[Grading Engine]
+end
 
-    %% Database Layer
-    subgraph "Data Layer"
-        PG[(PostgreSQL + pgvector<br/>Vector Similarity Search)]
-        REDIS[(Redis<br/>Cache + Jobs)]
-    end
+%% Background Jobs
+Jobs[Sidekiq Workers]
 
-    %% Workflow Connections
-    
-    %% 1. Document Upload Workflow
-    UI --> CMC
-    CMC --> CM
-    CM --> STORAGE
-    CM --> DIG
-    DIG --> EXT
-    EXT --> CHUNK
-    CHUNK --> EMB
-    EMB --> LLM
-    LLM --> CHK
-    CHK --> PG
-    
-    %% 2. Summary & Rubric Generation
-    DIG --> SGJ
-    DIG --> RGJ
-    SGJ --> SUM
-    RGJ --> RUBGEN
-    SUM --> LLM
-    RUBGEN --> LLM
-    
-    %% 3. Interactive Conversation Workflow
-    UI --> CC
-    CC --> CONV
-    UI --> MC
-    MC --> MSG
-    MSG --> ERJ
-    ERJ --> EVAL
-    EVAL --> PG
-    EVAL --> LLM
-    LLM --> MSG
-    MSG --> UI2
-    
-    %% 4. Evaluation & Grading Workflow
-    MC --> CEJ
-    CEJ --> GRADE
-    GRADE --> PG
-    GRADE --> LLM
-    GRADE --> GR
-    GR --> ID
-    
-    %% 5. Instructor Analytics
-    ID --> IDC
-    IDC --> PG
-    IDC --> REDIS
-    
-    %% Redis connections
-    REDIS --> DIG
-    REDIS --> SGJ
-    REDIS --> RGJ
-    REDIS --> ERJ
-    REDIS --> CEJ
+%% External
+LLM["LLM Provider<br>(OpenAI / Anthropic)"]
+Files[(File Storage)]
+Cache[(Redis Cache & Queue)]
 
-    %% Styling
-    classDef frontend fill:#e1f5fe
-    classDef rails fill:#f3e5f5
-    classDef services fill:#e8f5e8
-    classDef jobs fill:#fff3e0
-    classDef external fill:#ffebee
-    classDef data fill:#f1f8e9
-    
-    class UI,ID,UI2 frontend
-    class CC,MC,CMC,IDC,CM,CONV,MSG,CHK,RUB,GR rails
-    class EXT,CHUNK,EMB,SUM,RUBGEN,EVAL,GRADE services
-    class DIG,SGJ,RGJ,ERJ,CEJ jobs
-    class LLM,STORAGE external
-    class PG,REDIS data
+
+%% Flows
+Student --> App
+Instructor --> App
+
+App --> Files
+App --> Jobs
+Jobs --> Extract --> Chunk --> StoreVec
+
+Jobs --> Summarizer --> LLM
+Jobs --> RubricGen --> LLM
+
+App --> Responder --> LLM --> Student
+
+App --> Grader --> LLM --> Instructor
+
+App --> StoreVec
+App --> Cache
+Instructor --> StoreVec
+
 ```
 
 ### 📋 Workflow Breakdown

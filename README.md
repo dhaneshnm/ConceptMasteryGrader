@@ -1,10 +1,10 @@
-# Grader I2 - RAG-Augmented Educational Evaluation Platform
+# Concept Mastery Grader - RAG-Augmented Educational Evaluation Platform
 
 A sophisticated AI-powered educational assessment system that combines Retrieval-Augmented Generation (RAG) with interactive Socratic dialogue for evaluating student understanding.
 
 ## 🎯 Overview
 
-Grader I2 transforms traditional educational assessment by using advanced AI to engage students in meaningful conversations while automatically evaluating their conceptual understanding. The platform processes course materials, generates dynamic rubrics, and provides real-time feedback through intelligent dialogue.
+Concept Mastery Grader transforms traditional educational assessment by using advanced AI to engage students in meaningful conversations while automatically evaluating their conceptual understanding. The platform processes course materials, generates dynamic rubrics, and provides real-time feedback through intelligent dialogue.
 
 ## ✨ Key Features
 

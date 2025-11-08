@@ -49,6 +49,41 @@ class GradeReport < ApplicationRecord
     average_score < 0.5 || concepts_needing_improvement.size > (scores.size / 2)
   end
   
+  # Generate learning recommendations based on performance
+  def recommendations
+    recs = []
+    
+    # Recommendations based on weak concepts
+    weak_concepts = concepts_needing_improvement
+    if weak_concepts.any?
+      weak_concepts.each do |concept|
+        formatted_concept = concept.to_s.humanize
+        recs << "Focus on improving #{formatted_concept} concepts through additional practice and review"
+      end
+    end
+    
+    # General recommendations based on overall performance
+    case performance_level
+    when 'beginner'
+      recs << "Consider reviewing foundational concepts before advancing to new material"
+      recs << "Schedule additional practice sessions to strengthen core understanding"
+    when 'developing'
+      recs << "Continue practicing to build confidence in key concepts"
+      recs << "Focus on areas where understanding seems incomplete"
+    when 'proficient'
+      recs << "Great work! Consider exploring more advanced applications of these concepts"
+    when 'mastery'
+      recs << "Excellent understanding! Ready to move on to more challenging material"
+    end
+    
+    # If more than half the concepts need work
+    if weak_concepts.size > (scores.size / 2)
+      recs << "Consider scheduling a one-on-one session to address multiple knowledge gaps"
+    end
+    
+    recs
+  end
+  
   # Get detailed scores for each concept (formatted for UI display)
   def detailed_scores
     scores.transform_values do |level|

@@ -1,8 +1,8 @@
 #!/bin/bash
-# Production deployment script for Grader I2
+# Production deployment script for Concept Mastery Grader
 set -e
 
-echo "🚀 Starting Grader I2 production deployment..."
+echo "🚀 Starting Concept Mastery Grader production deployment..."
 
 # Check if required environment variables are set
 required_vars=(

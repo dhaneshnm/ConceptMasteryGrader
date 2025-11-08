@@ -1,6 +1,6 @@
-# Grader I2 - Production Deployment Guide
+# Concept Mastery Grader - Production Deployment Guide
 
-This guide covers deploying the Grader I2 RAG-augmented educational evaluation platform to production.
+This guide covers deploying the Concept Mastery Grader RAG-augmented educational evaluation platform to production.
 
 ## 🏗️ Architecture Overview
 

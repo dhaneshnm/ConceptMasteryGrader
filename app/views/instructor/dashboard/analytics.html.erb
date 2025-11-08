@@ -1,0 +1,240 @@
+<!-- Instructor Analytics Dashboard -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Navigation Header -->
+  <nav class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex">
+          <div class="flex-shrink-0 flex items-center">
+            <%= link_to "Grader AI", root_path, class: "text-xl font-bold text-blue-600" %>
+          </div>
+          <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <%= link_to "Dashboard", instructor_dashboard_index_path, 
+                        class: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" %>
+            <%= link_to "Conversations", instructor_conversations_path,
+                        class: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" %>
+            <%= link_to "Analytics", analytics_instructor_dashboard_index_path,
+                        class: "border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" %>
+          </div>
+        </div>
+        <div class="flex items-center">
+          <span class="text-sm text-gray-500">Instructor View</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div class="md:flex md:items-center md:justify-between">
+        <div class="flex-1 min-w-0">
+          <h1 class="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+          <p class="mt-1 text-sm text-gray-600">
+            <% if @course_material %>
+              Analytics for <%= @course_material.title %>
+            <% else %>
+              Comprehensive performance analytics across all course materials
+            <% end %>
+          </p>
+        </div>
+        <div class="mt-4 md:mt-0 md:ml-4">
+          <%= form_with url: analytics_instructor_dashboard_index_path, method: :get, local: true, class: "flex items-center space-x-2" do |form| %>
+            <%= form.select :course_material_id, 
+                            options_from_collection_for_select(CourseMaterial.all, :id, :title, @course_material&.id),
+                            { prompt: "All Course Materials" },
+                            { class: "rounded-md border-gray-300 text-sm", onchange: "this.form.submit();" } %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Analytics Content -->
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    
+    <!-- Performance Distribution -->
+    <div class="mb-8">
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Performance Distribution</h3>
+          
+          <% if @analytics_data[:performance_distribution].present? %>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+              <% @analytics_data[:performance_distribution].each do |range, data| %>
+                <div class="bg-gray-50 rounded-lg p-4 text-center">
+                  <div class="text-2xl font-bold text-gray-900"><%= data[:count] %></div>
+                  <div class="text-sm text-gray-500"><%= range %></div>
+                  <div class="text-xs text-gray-400"><%= data[:percentage] %>% of students</div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-gray-500 text-center py-8">No performance data available yet.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Concept Mastery and Engagement Metrics -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      
+      <!-- Concept Mastery -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Concept Mastery</h3>
+          
+          <% if @analytics_data[:concept_mastery].present? %>
+            <div class="space-y-4">
+              <% @analytics_data[:concept_mastery].each do |concept, data| %>
+                <div class="border-b border-gray-200 pb-3 last:border-b-0">
+                  <div class="flex justify-between items-center mb-2">
+                    <h4 class="text-sm font-medium text-gray-900"><%= concept.humanize %></h4>
+                    <span class="text-sm text-gray-500"><%= data[:total_assessments] %> assessments</span>
+                  </div>
+                  <div class="flex justify-between text-xs text-gray-600 mb-1">
+                    <span>Average Score: <strong><%= (data[:average_score] * 100).round %>%</strong></span>
+                    <span>Mastery Rate: <strong><%= data[:mastery_rate] %>%</strong></span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-600 h-2 rounded-full" style="width: <%= data[:mastery_rate] %>%"></div>
+                  </div>
+                  <% if data[:needs_support] > 0 %>
+                    <p class="text-xs text-orange-600 mt-1"><%= data[:needs_support] %> students need support</p>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <p class="text-gray-500 text-center py-8">
+              <% if @course_material %>
+                No concept data available for this course material.
+              <% else %>
+                Select a course material to view concept mastery data.
+              <% end %>
+            </p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Engagement Metrics -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Engagement Metrics</h3>
+          
+          <% if @analytics_data[:engagement_metrics].present? %>
+            <div class="space-y-4">
+              <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                <span class="text-sm text-gray-600">Avg. Messages per Conversation</span>
+                <span class="font-medium text-gray-900">
+                  <%= @analytics_data[:engagement_metrics][:average_messages_per_conversation]&.round(1) || 0 %>
+                </span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                <span class="text-sm text-gray-600">Avg. Student Messages</span>
+                <span class="font-medium text-gray-900">
+                  <%= @analytics_data[:engagement_metrics][:average_user_messages]&.round(1) || 0 %>
+                </span>
+              </div>
+              <div class="flex justify-between items-center py-2 border-b border-gray-200">
+                <span class="text-sm text-gray-600">Conversations with Evaluation</span>
+                <span class="font-medium text-gray-900">
+                  <%= @analytics_data[:engagement_metrics][:conversations_with_evaluation] || 0 %>
+                </span>
+              </div>
+              <div class="flex justify-between items-center py-2">
+                <span class="text-sm text-gray-600">Active Last Week</span>
+                <span class="font-medium text-gray-900">
+                  <%= @analytics_data[:engagement_metrics][:active_conversations_last_week] || 0 %>
+                </span>
+              </div>
+            </div>
+          <% else %>
+            <p class="text-gray-500 text-center py-8">No engagement data available.</p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Improvement Trends and Misconceptions -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      
+      <!-- Improvement Trends -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Improvement Trends</h3>
+          
+          <% if @analytics_data[:improvement_trends].present? && @analytics_data[:improvement_trends][:total_re_evaluated]&.positive? %>
+            <div class="space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Students Improving</span>
+                <span class="text-green-600 font-medium">
+                  <%= @analytics_data[:improvement_trends][:conversations_with_improvement] || 0 %>
+                </span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Students Declining</span>
+                <span class="text-red-600 font-medium">
+                  <%= @analytics_data[:improvement_trends][:conversations_with_decline] || 0 %>
+                </span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-600">Average Change</span>
+                <span class="font-medium <%= @analytics_data[:improvement_trends][:average_improvement]&.positive? ? 'text-green-600' : 'text-red-600' %>">
+                  <%= (@analytics_data[:improvement_trends][:average_improvement] * 100)&.round(1) || 0 %>%
+                </span>
+              </div>
+              <div class="pt-2 border-t border-gray-200">
+                <span class="text-xs text-gray-500">
+                  Based on <%= @analytics_data[:improvement_trends][:total_re_evaluated] %> re-evaluated conversations
+                </span>
+              </div>
+            </div>
+          <% else %>
+            <p class="text-gray-500 text-center py-8">No improvement data available yet. Students need multiple evaluations to track trends.</p>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Common Misconceptions -->
+      <div class="bg-white shadow rounded-lg">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Common Misconceptions</h3>
+          
+          <% if @analytics_data[:misconception_frequency].present? %>
+            <div class="space-y-3">
+              <% @analytics_data[:misconception_frequency].first(5).each do |pattern, data| %>
+                <div class="border-l-4 <%= data[:severity] == 'high' ? 'border-red-400' : data[:severity] == 'medium' ? 'border-yellow-400' : 'border-blue-400' %> pl-3 py-2">
+                  <div class="flex justify-between items-start">
+                    <div class="flex-1">
+                      <p class="text-sm font-medium text-gray-900 truncate"><%= pattern %></p>
+                      <p class="text-xs text-gray-600 mt-1"><%= data[:description] %></p>
+                    </div>
+                    <div class="ml-2 text-right">
+                      <span class="text-xs text-gray-500">Frequency: <%= data[:frequency] %></span>
+                      <span class="block text-xs capitalize text-gray-500"><%= data[:severity] %> priority</span>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+            <% if @course_material %>
+              <div class="mt-4 pt-4 border-t border-gray-200">
+                <%= link_to "View All Misconceptions", misconceptions_instructor_dashboard_index_path(course_material_id: @course_material.id),
+                            class: "text-blue-600 hover:text-blue-500 text-sm font-medium" %>
+              </div>
+            <% end %>
+          <% else %>
+            <p class="text-gray-500 text-center py-8">
+              <% if @course_material %>
+                No misconception patterns identified for this course material yet.
+              <% else %>
+                Select a course material to view misconception patterns.
+              <% end %>
+            </p>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -55,6 +55,9 @@ gem "redis", ">= 4.0"
 # pgvector for vector similarity search
 gem "pgvector"
 
+# Pagination
+gem "kaminari"
+
 # TailwindCSS for styling
 gem "tailwindcss-rails"
 

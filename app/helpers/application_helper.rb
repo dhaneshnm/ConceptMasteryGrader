@@ -61,4 +61,32 @@ module ApplicationHelper
       'alert alert-info'
     end
   end
+
+  # Render markdown content as HTML
+  def markdown(text)
+    return '' if text.blank?
+    
+    renderer = Redcarpet::Render::HTML.new(
+      filter_html: true,
+      no_images: false,
+      no_links: false,
+      no_styles: false,
+      safe_links_only: true,
+      with_toc_data: false,
+      hard_wrap: true
+    )
+    
+    markdown_processor = Redcarpet::Markdown.new(
+      renderer,
+      autolink: true,
+      fenced_code_blocks: true,
+      lax_spacing: true,
+      no_intra_emphasis: true,
+      strikethrough: true,
+      superscript: true,
+      tables: true
+    )
+    
+    markdown_processor.render(text).html_safe
+  end
 end

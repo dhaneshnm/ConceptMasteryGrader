@@ -4,8 +4,8 @@ class CourseMaterial < ApplicationRecord
   # Status enum for processing workflow
   enum :status, { uploaded: 0, processed: 1 }, default: :uploaded
   
-  # ActiveStorage association for file upload
-  has_one_attached :file
+  # ActiveStorage association for file uploads
+  has_many_attached :files
   
   # Associated domain objects
   has_many :chunks, dependent: :destroy
@@ -16,23 +16,23 @@ class CourseMaterial < ApplicationRecord
   
   # Validations
   validates :title, presence: true, length: { minimum: 1, maximum: 255 }
-  validates :file, presence: true, on: :create
-  validate :file_is_pdf, if: -> { file.attached? }
+  validates :files, presence: true, on: :create
+  validate :files_are_pdfs, if: -> { files.attached? }
   
   scope :processed, -> { where(status: :processed) }
   scope :uploaded, -> { where(status: :uploaded) }
   
   # Callbacks
-  after_create :enqueue_processing_job, if: :file_attached?
+  after_create :enqueue_processing_job, if: :files_attached?
   
   # Mark as processed after successful ingestion
   def mark_as_processed!
     update!(status: :processed)
   end
   
-  # Check if file is attached
-  def file_attached?
-    file.attached?
+  # Check if files are attached
+  def files_attached?
+    files.attached? && files.any?
   end
   
   # Enqueue background job for processing
@@ -56,11 +56,13 @@ class CourseMaterial < ApplicationRecord
   
   private
   
-  def file_is_pdf
-    return unless file.attached?
+  def files_are_pdfs
+    return unless files.attached?
     
-    unless file.content_type == 'application/pdf'
-      errors.add(:file, 'must be a PDF file')
+    files.each_with_index do |file, index|
+      unless file.content_type == 'application/pdf'
+        errors.add(:files, "File #{index + 1} (#{file.filename}) must be a PDF file")
+      end
     end
   end
 end

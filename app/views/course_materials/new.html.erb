@@ -45,27 +45,29 @@
         </div>
         
         <div class="space-y-3">
-          <%= form.label :file, "PDF File", class: "form-label text-lg" %>
+          <%= form.label :files, "PDF Files", class: "form-label text-lg" %>
           <div class="mt-2 flex justify-center px-8 pt-8 pb-8 border-2 border-primary-200 border-dashed rounded-2xl hover:border-primary-300 transition-colors bg-primary-25">
             <div class="space-y-4 text-center">
               <svg class="mx-auto h-16 w-16 text-primary-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                 <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
               <div class="flex text-lg text-neutral-600">
-                <label for="course_material_file" class="relative cursor-pointer bg-white rounded-xl font-semibold text-primary-600 hover:text-primary-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500 px-3 py-1">
-                  <span>Upload a PDF file</span>
-                  <%= form.file_field :file, 
-                      id: "course_material_file",
+                <label for="course_material_files" class="relative cursor-pointer bg-white rounded-xl font-semibold text-primary-600 hover:text-primary-700 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary-500 px-3 py-1">
+                  <span>Upload PDF files</span>
+                  <%= form.file_field :files, 
+                      id: "course_material_files",
                       class: "sr-only", 
-                      accept: ".pdf,application/pdf" %>
+                      accept: ".pdf,application/pdf",
+                      multiple: true %>
                 </label>
                 <p class="pl-2">or drag and drop</p>
               </div>
-              <p class="text-sm text-neutral-500">PDF files up to 10MB</p>
+              <p class="text-sm text-neutral-500">Multiple PDF files up to 10MB each</p>
             </div>
           </div>
-          <% if @course_material.errors[:file].any? %>
-            <p class="mt-2 text-red-600 font-medium"><%= @course_material.errors[:file].first %></p>
+          <div id="selected-files-container" class="mt-4 space-y-2"></div>
+          <% if @course_material.errors[:files].any? %>
+            <p class="mt-2 text-red-600 font-medium"><%= @course_material.errors[:files].first %></p>
           <% end %>
         </div>
         
@@ -102,22 +104,99 @@
 </div>
 
 <script>
-  // Add file upload preview functionality
-  document.getElementById('course_material_file').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const fileInfo = document.createElement('p');
-      fileInfo.className = 'mt-3 text-primary-700 font-medium bg-primary-50 rounded-lg p-3 border border-primary-200';
-      fileInfo.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+  // Add multiple file upload preview functionality
+  document.getElementById('course_material_files').addEventListener('change', function(e) {
+    const files = Array.from(e.target.files);
+    const container = document.getElementById('selected-files-container');
+    
+    // Clear existing file previews
+    container.innerHTML = '';
+    
+    if (files.length > 0) {
+      const filesHeader = document.createElement('h4');
+      filesHeader.className = 'text-lg font-medium text-neutral-800 mb-2';
+      filesHeader.textContent = `Selected Files (${files.length}):`;
+      container.appendChild(filesHeader);
       
-      // Remove any existing file info
-      const existingInfo = e.target.parentNode.parentNode.parentNode.querySelector('.file-info');
-      if (existingInfo) {
-        existingInfo.remove();
-      }
+      files.forEach((file, index) => {
+        const fileDiv = document.createElement('div');
+        fileDiv.className = 'flex items-center justify-between p-3 bg-primary-50 rounded-lg border border-primary-200';
+        
+        const fileInfo = document.createElement('div');
+        fileInfo.className = 'flex items-center space-x-3';
+        
+        const fileIcon = document.createElement('div');
+        fileIcon.innerHTML = `
+          <svg class="h-6 w-6 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/>
+          </svg>
+        `;
+        
+        const fileText = document.createElement('div');
+        fileText.innerHTML = `
+          <p class="font-medium text-neutral-900">${file.name}</p>
+          <p class="text-sm text-neutral-600">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+        `;
+        
+        fileInfo.appendChild(fileIcon);
+        fileInfo.appendChild(fileText);
+        
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'text-red-600 hover:text-red-800 font-medium text-sm';
+        removeBtn.textContent = 'Remove';
+        removeBtn.onclick = function() {
+          // Remove this file from the input
+          const dt = new DataTransfer();
+          files.splice(index, 1);
+          files.forEach(f => dt.items.add(f));
+          e.target.files = dt.files;
+          
+          // Trigger change event to refresh the preview
+          e.target.dispatchEvent(new Event('change', { bubbles: true }));
+        };
+        
+        fileDiv.appendChild(fileInfo);
+        fileDiv.appendChild(removeBtn);
+        container.appendChild(fileDiv);
+      });
       
-      fileInfo.classList.add('file-info');
-      e.target.parentNode.parentNode.parentNode.appendChild(fileInfo);
+      // Add total size info
+      const totalSize = files.reduce((sum, file) => sum + file.size, 0);
+      const totalInfo = document.createElement('p');
+      totalInfo.className = 'mt-2 text-sm text-neutral-600 font-medium';
+      totalInfo.textContent = `Total size: ${(totalSize / 1024 / 1024).toFixed(2)} MB`;
+      container.appendChild(totalInfo);
+    }
+  });
+  
+  // Add drag and drop functionality
+  const dropZone = document.querySelector('.border-dashed');
+  
+  dropZone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.classList.add('border-primary-400', 'bg-primary-50');
+  });
+  
+  dropZone.addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.classList.remove('border-primary-400', 'bg-primary-50');
+  });
+  
+  dropZone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    this.classList.remove('border-primary-400', 'bg-primary-50');
+    
+    const files = Array.from(e.dataTransfer.files).filter(file => file.type === 'application/pdf');
+    if (files.length > 0) {
+      const fileInput = document.getElementById('course_material_files');
+      const dt = new DataTransfer();
+      files.forEach(file => dt.items.add(file));
+      fileInput.files = dt.files;
+      fileInput.dispatchEvent(new Event('change', { bubbles: true }));
     }
   });
 </script>

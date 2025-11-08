@@ -26,6 +26,11 @@
             
             <div class="space-y-3 text-sm text-neutral-600 mb-6">
               <div class="flex justify-between items-center">
+                <span class="font-medium">Files:</span>
+                <span><%= pluralize(material.files.count, 'file') %></span>
+              </div>
+              
+              <div class="flex justify-between items-center">
                 <span class="font-medium">Uploaded:</span>
                 <span><%= material.created_at.strftime("%b %d, %Y") %></span>
               </div>

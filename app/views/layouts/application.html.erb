@@ -23,9 +23,66 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <main class="container mx-auto mt-28 px-5 flex">
-      <%= yield %>
+  <body class="bg-primary-50 min-h-screen">
+    <!-- Navigation Header -->
+    <header class="bg-white shadow-soft border-b border-primary-100 sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="flex justify-between items-center h-16">
+          <div class="flex items-center space-x-8">
+            <div class="flex items-center space-x-3">
+              <div class="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                <span class="text-white font-bold text-sm">G</span>
+              </div>
+              <%= link_to "Grader I2", root_path, class: "text-xl font-bold text-neutral-800 hover:text-primary-700 transition-colors" %>
+            </div>
+            
+            <nav class="hidden md:flex space-x-6">
+              <%= link_to "Course Materials", course_materials_path, 
+                  class: "nav-link #{'active' if controller_name == 'course_materials'}" %>
+              <%= link_to "Instructor Dashboard", instructor_dashboard_index_path, 
+                  class: "nav-link #{'active' if controller_path.start_with?('instructor')}" %>
+            </nav>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <!-- Mobile menu button -->
+            <button type="button" class="md:hidden p-2 rounded-lg text-neutral-600 hover:text-primary-700 hover:bg-primary-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 py-8">
+      <div class="max-w-7xl mx-auto px-6">
+        <!-- Flash Messages -->
+        <%= render 'shared/flash_messages' if flash.any? %>
+        
+        <div class="page-transition">
+          <%= yield %>
+        </div>
+      </div>
     </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-primary-100 mt-auto">
+      <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <div class="flex items-center space-x-3 mb-4 md:mb-0">
+            <div class="w-6 h-6 bg-primary-600 rounded flex items-center justify-center">
+              <span class="text-white font-bold text-xs">G</span>
+            </div>
+            <span class="text-neutral-600 text-sm">Grader I2 - Intelligent Assessment Platform</span>
+          </div>
+          <div class="text-sm text-neutral-500">
+            © <%= Date.current.year %> Grader I2. Built with care for educators.
+          </div>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

@@ -2,9 +2,9 @@ module ApplicationHelper
   # Message bubble styling based on message sender
   def message_bubble_class(message)
     if message.from_user?
-      "bg-blue-600 text-white"
+      "bg-primary-600 text-white"
     else
-      "bg-gray-100 text-gray-900"
+      "bg-neutral-100 text-neutral-800"
     end
   end
   
@@ -17,15 +17,48 @@ module ApplicationHelper
     end
   end
   
-  # Status badge styling
+  # Status badge styling with green theme
   def status_badge_class(status)
     case status.to_s
     when 'uploaded'
-      'bg-yellow-100 text-yellow-800'
+      'bg-secondary-100 text-secondary-800'
     when 'processed'
-      'bg-green-100 text-green-800'
+      'bg-primary-100 text-primary-800'
+    when 'processing'
+      'bg-accent-100 text-accent-800'
+    when 'error'
+      'bg-red-100 text-red-800'
     else
-      'bg-gray-100 text-gray-800'
+      'bg-neutral-100 text-neutral-800'
+    end
+  end
+  
+  # Button classes for consistent styling
+  def btn_primary_class
+    "btn-primary btn-hover-lift"
+  end
+  
+  def btn_secondary_class
+    "btn-secondary btn-hover-lift"
+  end
+  
+  def btn_outline_class
+    "btn-outline"
+  end
+  
+  # Alert message styling
+  def alert_class(type)
+    case type.to_s
+    when 'success'
+      'alert alert-success'
+    when 'error', 'alert'
+      'alert alert-error'
+    when 'warning'
+      'alert alert-warning'
+    when 'notice', 'info'
+      'alert alert-info'
+    else
+      'alert alert-info'
     end
   end
 end

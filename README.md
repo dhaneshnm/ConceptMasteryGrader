@@ -43,6 +43,22 @@ Concept Mastery Grader transforms traditional educational assessment by using ad
 
 ## 🔄 System Architecture & Workflow
 
+## Simple Architecture Diagram
+flowchart LR
+
+A[PDFs] --> B[Preprocessing\nExtract • Chunk • Embed] --> C[(Vector DB)]
+
+C --> D["Summary Generator (RAG)"] --> E["Rubric Builder (RAG)"] --> F[Interactive Chatbot]
+C <--> F
+
+F --> G[Chat Transcript + Evidence Tags] --> H["Grader (RAG-Evidence Based)"]
+C <--> H
+
+H --> I[Final Grade Report]
+
+
+
+## Detsiled Architecture Diagram
 ```mermaid
 graph TB
     %% User Interface Layer
@@ -228,8 +244,8 @@ Database → Aggregation Queries → Trend Analysis → Real-time Charts
 
 1. **Clone and Setup**
 ```bash
-git clone https://github.com/your-org/grader-i2.git
-cd grader-i2
+git clone git@github.com:dhaneshnm/ConceptMasteryGrader.git
+cd ConceptMasteryGrader
 bundle install
 npm install
 ```

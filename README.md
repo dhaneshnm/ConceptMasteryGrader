@@ -44,6 +44,7 @@ Concept Mastery Grader transforms traditional educational assessment by using ad
 ## 🔄 System Architecture & Workflow
 
 ## Simple Architecture Diagram
+```mermaid
 flowchart LR
 
 A[PDFs] --> B[Preprocessing\nExtract • Chunk • Embed] --> C[(Vector DB)]
@@ -55,7 +56,7 @@ F --> G[Chat Transcript + Evidence Tags] --> H["Grader (RAG-Evidence Based)"]
 C <--> H
 
 H --> I[Final Grade Report]
-
+```
 
 
 ## Detailed Architecture Diagram

@@ -131,7 +131,10 @@ class Grading::EvaluateConversation
     # Use LLM to extract key themes and concepts
     theme_prompt = build_theme_extraction_prompt(combined_content)
     
-    response = LLM.chat(messages: [{ role: "user", content: theme_prompt }])
+    chat = LLM.chat
+    chat.add_message(role: "user", content: theme_prompt)
+    result = chat.complete
+    response = result.content
     
     if response&.strip&.present?
       # Parse LLM response to extract structured themes
@@ -215,7 +218,10 @@ class Grading::EvaluateConversation
     # Use LLM to evaluate against rubric levels
     evaluation_prompt = build_concept_evaluation_prompt(rubric, concept_evidence, conversation_analysis)
     
-    response = LLM.chat(messages: [{ role: "user", content: evaluation_prompt }])
+    chat = LLM.chat
+    chat.add_message(role: "user", content: evaluation_prompt)
+    result = chat.complete
+    response = result.content
     
     if response&.strip&.present?
       parse_concept_evaluation(response, rubric)

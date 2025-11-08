@@ -139,7 +139,25 @@ class Documents::IngestionService
   def generate_embedding(text)
     begin
       # Use ruby_llm to generate embedding
-      LLM.embed(text)
+      embedding_result = LLM.embed(text)
+      
+      # Extract the actual embedding array from the RubyLLM::Embedding object
+      # Try different common attribute names for embedding data
+      if embedding_result.respond_to?(:vectors)
+        embedding_result.vectors
+      elsif embedding_result.respond_to?(:vector)
+        embedding_result.vector
+      elsif embedding_result.respond_to?(:embedding)
+        embedding_result.embedding
+      elsif embedding_result.respond_to?(:data)
+        embedding_result.data
+      elsif embedding_result.respond_to?(:to_a)
+        embedding_result.to_a
+      else
+        Rails.logger.error "Unknown embedding format: #{embedding_result.class}. Available methods: #{embedding_result.methods.grep(/vector|embedding|data|array/).join(', ')}"
+        add_error("Unknown embedding format: #{embedding_result.class}")
+        nil
+      end
     rescue StandardError => e
       Rails.logger.error "Failed to generate embedding: #{e.message}"
       add_error("Failed to generate embedding: #{e.message}")

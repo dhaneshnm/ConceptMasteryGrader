@@ -172,7 +172,12 @@ class Evaluator::ResponseGenerator
     
     Rails.logger.info "Generating evaluator response using #{context_data[:chunks].size} chunks and #{context_data[:rubrics].size} rubrics"
     
-    response = LLM.chat(messages: messages)
+    chat = LLM.chat
+    messages.each do |message|
+      chat.add_message(role: message[:role], content: message[:content])
+    end
+    result = chat.complete
+    response = result.content
     
     if response && response.strip.present?
       response.strip

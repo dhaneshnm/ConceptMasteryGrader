@@ -113,7 +113,11 @@ class Rubrics::Generate
     
     Rails.logger.info "Extracting key concepts for rubric generation"
     
-    response = LLM.chat(messages: messages)
+    chat = LLM.chat
+    chat.add_message(role: "system", content: CONCEPT_EXTRACTION_PROMPT)
+    chat.add_message(role: "user", content: "Extract key concepts from this course summary:\n\n#{summary.content}")
+    result = chat.complete
+    response = result.content
     
     if response && response.strip.present?
       parse_concepts_response(response)
@@ -198,7 +202,11 @@ class Rubrics::Generate
     
     Rails.logger.info "Generating rubric for concept: #{concept_info['name']}"
     
-    response = LLM.chat(messages: messages)
+    chat = LLM.chat
+    chat.add_message(role: "system", content: build_rubric_generation_prompt)
+    chat.add_message(role: "user", content: build_rubric_user_prompt(concept_info))
+    result = chat.complete
+    response = result.content
     
     if response && response.strip.present?
       rubric_levels = parse_rubric_response(response)

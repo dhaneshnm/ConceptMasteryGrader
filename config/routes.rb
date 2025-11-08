@@ -14,7 +14,8 @@ Rails.application.routes.draw do
   
   # Course materials with nested resources
   resources :course_materials do
-    resources :summaries, only: [:index, :create, :show, :destroy]
+    resource :summary, only: [:show, :create, :destroy]
+    resources :summaries, only: [:index]
     resources :rubrics, only: [:index, :create, :show, :edit, :update, :destroy] 
     resources :conversations do
       resources :messages, only: [:create, :destroy]

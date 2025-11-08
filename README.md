@@ -228,8 +228,8 @@ Database → Aggregation Queries → Trend Analysis → Real-time Charts
 
 1. **Clone and Setup**
 ```bash
-git clone https://github.com/your-org/grader-i2.git
-cd grader-i2
+git clone git@github.com:dhaneshnm/ConceptMasteryGrader.git
+cd ConceptMasteryGrader
 bundle install
 npm install
 ```

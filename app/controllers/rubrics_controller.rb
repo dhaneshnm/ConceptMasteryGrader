@@ -53,7 +53,7 @@ class RubricsController < ApplicationController
   end
   
   def set_rubric
-    @rubric = @course_material.rubrics.find(params[:id])
+    @rubric = @course_material.rubrics.find(params[:id]) if params[:id]
   end
   
   def rubric_params

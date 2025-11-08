@@ -100,21 +100,10 @@ class Rubrics::Generate
   
   def extract_key_concepts(summary)
     # Use LLM to identify key concepts from the summary
-    messages = [
-      {
-        role: "system",
-        content: build_concept_extraction_prompt
-      },
-      {
-        role: "user", 
-        content: "Extract key concepts from this course summary:\n\n#{summary.content}"
-      }
-    ]
-    
     Rails.logger.info "Extracting key concepts for rubric generation"
     
     chat = LLM.chat
-    chat.add_message(role: "system", content: CONCEPT_EXTRACTION_PROMPT)
+    chat.add_message(role: "system", content: build_concept_extraction_prompt)
     chat.add_message(role: "user", content: "Extract key concepts from this course summary:\n\n#{summary.content}")
     result = chat.complete
     response = result.content

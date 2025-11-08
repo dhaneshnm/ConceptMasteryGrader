@@ -92,7 +92,7 @@ module GradeReportsHelper
       highest: scores.max,
       lowest: scores.min,
       total_count: grade_reports.size,
-      recent_count: grade_reports.where(evaluated_at: 1.week.ago..).count
+      recent_count: grade_reports.where(created_at: 1.week.ago..).count
     }
   end
   

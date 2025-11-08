@@ -3,6 +3,9 @@
 class GradeReport < ApplicationRecord
   belongs_to :conversation
   
+  # Callbacks
+  before_save :calculate_overall_score
+  
   # Validations
   validates :conversation, presence: true
   validates :scores, presence: true
@@ -14,22 +17,19 @@ class GradeReport < ApplicationRecord
     scores[concept.to_s]
   end
   
-  # Get overall average score
+  # Get overall average score (0-1 scale)
   def average_score
-    return 0 if scores.empty?
-    
-    total = scores.values.sum { |score| level_to_number(score) }
-    (total.to_f / scores.size).round(2)
+    overall_score || calculate_overall_score_value
   end
   
   # Get performance level based on average
   def performance_level
     avg = average_score
     case avg
-    when 0...1.5 then 'beginner'
-    when 1.5...2.5 then 'developing'  
-    when 2.5...3.5 then 'proficient'
-    when 3.5..4.0 then 'mastery'
+    when 0...0.375 then 'beginner'      # 0-37.5% (was 0-1.5)
+    when 0.375...0.625 then 'developing'  # 37.5-62.5% (was 1.5-2.5)
+    when 0.625...0.875 then 'proficient'  # 62.5-87.5% (was 2.5-3.5)
+    when 0.875..1.0 then 'mastery'      # 87.5-100% (was 3.5-4.0)
     else 'unassessed'
     end
   end
@@ -46,7 +46,17 @@ class GradeReport < ApplicationRecord
   
   # Check if student needs attention based on performance
   def needs_attention?
-    average_score < 2.0 || concepts_needing_improvement.size > (scores.size / 2)
+    average_score < 0.5 || concepts_needing_improvement.size > (scores.size / 2)
+  end
+  
+  # Get detailed scores for each concept (formatted for UI display)
+  def detailed_scores
+    scores.transform_values do |level|
+      {
+        'level' => level,
+        'score' => level_to_number(level) / 4.0 # Convert to 0-1 scale for progress bars
+      }
+    end
   end
   
   # Generate JSON data for dashboard display
@@ -58,7 +68,7 @@ class GradeReport < ApplicationRecord
       course_material_title: conversation.course_material.title,
       average_score: average_score,
       performance_level: performance_level,
-      evaluated_at: updated_at.iso8601,
+      evaluated_at: created_at.iso8601,
       needs_attention: needs_attention?,
       concept_count: scores.keys.size,
       strengths: strengths,
@@ -67,6 +77,17 @@ class GradeReport < ApplicationRecord
   end
   
   private
+  
+  def calculate_overall_score_value
+    return 0 if scores.blank?
+    
+    total = scores.values.sum { |score| level_to_number(score) }
+    (total.to_f / scores.size / 4.0).round(3) # Convert to 0-1 scale
+  end
+  
+  def calculate_overall_score
+    self.overall_score = calculate_overall_score_value
+  end
   
   def level_to_number(level)
     case level.to_s.downcase

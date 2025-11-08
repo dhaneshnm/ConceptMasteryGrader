@@ -1,0 +1,5 @@
+<%= turbo_stream.append "messages", partial: "messages/message", locals: { message: @message } %>
+<%= turbo_stream.replace "message_form", partial: "messages/form", locals: { conversation: @conversation, message: @conversation.messages.build } %>
+<% if @message.from_user? %>
+  <%= turbo_stream.update "typing_indicator", content: "<div class='flex items-center text-gray-500 text-sm py-2'><div class='typing-dots mr-2'><span></span><span></span><span></span></div>AI is thinking...</div>" %>
+<% end %>

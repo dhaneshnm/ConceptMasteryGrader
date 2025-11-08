@@ -16,7 +16,11 @@ Rails.application.routes.draw do
   resources :course_materials do
     resource :summary, only: [:show, :create, :destroy]
     resources :summaries, only: [:index]
-    resources :rubrics, only: [:index, :create, :show, :edit, :update, :destroy] 
+    resources :rubrics, only: [:index, :create, :show, :edit, :update, :destroy] do
+      collection do
+        post :generate
+      end
+    end
     resources :conversations do
       resources :messages, only: [:create, :destroy]
       resources :grade_reports, only: [:index, :show, :create, :destroy] do
@@ -32,12 +36,13 @@ Rails.application.routes.draw do
   namespace :instructor do
     resources :dashboard, only: [:index] do
       collection do
-        get :conversations
         get :analytics
         get :misconceptions
         post :batch_evaluate
       end
     end
+    
+    resources :conversations, only: [:index]
     
     resources :course_materials, only: [] do
       resources :misconception_patterns do

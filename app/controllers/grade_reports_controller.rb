@@ -32,7 +32,7 @@ class GradeReportsController < ApplicationController
     end
     
     # Validate conversation has sufficient content
-    unless @conversation.messages.from_user.count >= 2
+    unless @conversation.messages.user_messages.count >= 2
       redirect_to [@conversation.course_material, @conversation],
                   alert: 'Conversation must have at least 2 student messages to evaluate.'
       return
@@ -81,7 +81,7 @@ class GradeReportsController < ApplicationController
       respond_to do |format|
         format.turbo_stream do
           render turbo_stream: turbo_stream.update("evaluation_status",
-            content: "<div class='bg-red-50 border border-red-200 rounded-lg p-4 mb-4'>
+            "<div class='bg-red-50 border border-red-200 rounded-lg p-4 mb-4'>
                         <h4 class='text-red-800 font-medium'>Evaluation Error</h4>
                         <p class='text-red-600 text-sm mt-1'>Unable to start evaluation. Please try again.</p>
                       </div>"

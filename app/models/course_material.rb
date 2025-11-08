@@ -47,7 +47,7 @@ class CourseMaterial < ApplicationRecord
       title: title,
       conversation_count: conversations.count,
       evaluated_conversation_count: conversations.joins(:grade_reports).distinct.count,
-      summary_count: summaries.count,
+      summary_count: summary ? 1 : 0,
       rubric_count: rubrics.count,
       recent_activity_count: conversations.where(updated_at: 1.week.ago..).count,
       last_updated: updated_at.iso8601

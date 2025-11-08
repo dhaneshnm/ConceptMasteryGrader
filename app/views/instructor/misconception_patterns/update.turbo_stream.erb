@@ -1,0 +1,4 @@
+<%# This template is rendered when updating patterns via Turbo Stream %>
+<%= turbo_stream.replace "misconception_pattern_#{@misconception_pattern.id}" do %>
+  <%= render 'pattern', pattern: @misconception_pattern %>
+<% end %>

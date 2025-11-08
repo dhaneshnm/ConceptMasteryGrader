@@ -1,0 +1,8 @@
+<%# This template is rendered when creating patterns via Turbo Stream %>
+<%= turbo_stream.prepend "misconception_patterns_list" do %>
+  <%= render 'pattern', pattern: @misconception_pattern %>
+<% end %>
+
+<%= turbo_stream.replace "new_pattern_form" do %>
+  <%= render 'form', misconception_pattern: @course_material.misconception_patterns.build, course_material: @course_material %>
+<% end %>

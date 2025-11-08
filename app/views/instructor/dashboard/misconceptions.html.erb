@@ -1,0 +1,185 @@
+<!-- Instructor Misconceptions Dashboard View -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Navigation Header -->
+  <nav class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex">
+          <div class="flex-shrink-0 flex items-center">
+            <%= link_to "Grader AI", root_path, class: "text-xl font-bold text-blue-600" %>
+          </div>
+          <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+            <%= link_to "Dashboard", instructor_dashboard_index_path, 
+                        class: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" %>
+            <%= link_to "Conversations", instructor_conversations_path,
+                        class: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" %>
+            <%= link_to "Misconceptions", misconceptions_instructor_dashboard_index_path,
+                        class: "border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" %>
+            <%= link_to "Analytics", analytics_instructor_dashboard_index_path,
+                        class: "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium" %>
+          </div>
+        </div>
+        <div class="flex items-center">
+          <span class="text-sm text-gray-500">Instructor View</span>
+        </div>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Page Header -->
+  <div class="bg-white shadow">
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <h1 class="text-3xl font-bold text-gray-900">Misconception Patterns</h1>
+      <p class="mt-1 text-sm text-gray-600">Manage and monitor common student misconceptions across all courses</p>
+    </div>
+  </div>
+  
+  <!-- Content -->
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Course Material Filter -->
+    <div class="bg-white shadow rounded-lg mb-6">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <%= form_with url: misconceptions_instructor_dashboard_index_path, method: :get, local: true, class: "flex flex-wrap items-center space-x-3" do |f| %>
+              <%= f.select :course_material_id,
+                          options_from_collection_for_select(CourseMaterial.all, :id, :title, params[:course_material_id]),
+                          { prompt: 'All Course Materials' },
+                          { class: "rounded-md border-gray-300 py-2 pl-3 pr-10 text-sm focus:border-blue-500 focus:ring-blue-500",
+                            onchange: "this.form.submit();" } %>
+            <% end %>
+            
+            <% if @course_material %>
+              <%= link_to "Manage Patterns for #{@course_material.title}", 
+                          instructor_course_material_misconception_patterns_path(@course_material),
+                          class: "bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+            <% end %>
+          </div>
+          
+          <div class="mt-3 sm:mt-0">
+            <span class="text-sm text-gray-500">
+              <%= @misconception_patterns.respond_to?(:total_count) ? @misconception_patterns.total_count : @misconception_patterns.count %> patterns total
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Patterns Overview -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-medium text-gray-900">
+            <% if @course_material %>
+              Patterns for <%= @course_material.title %>
+            <% else %>
+              All Misconception Patterns
+            <% end %>
+            <span class="text-sm text-gray-500">
+              (<%= @misconception_patterns.respond_to?(:total_count) ? @misconception_patterns.total_count : @misconception_patterns.count %> total)
+            </span>
+          </h2>
+        </div>
+
+        <% if @misconception_patterns.any? %>
+          <div class="space-y-4">
+            <% @misconception_patterns.each do |pattern| %>
+              <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center space-x-3 mb-2">
+                      <h3 class="text-lg font-medium text-gray-900"><%= pattern.name %></h3>
+                      <% if pattern.severity.present? %>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                     <%= case pattern.severity&.downcase
+                                         when 'high' then 'bg-red-100 text-red-800'
+                                         when 'medium' then 'bg-yellow-100 text-yellow-800'
+                                         when 'low' then 'bg-blue-100 text-blue-800'
+                                         else 'bg-gray-100 text-gray-800'
+                                         end %>">
+                          <%= pattern.severity&.titleize || 'Medium' %>
+                        </span>
+                      <% end %>
+                    </div>
+                    
+                    <div class="flex items-center space-x-4 text-sm text-gray-600 mb-3">
+                      <span><strong>Concept:</strong> <%= pattern.concept %></span>
+                      <span><strong>Course:</strong> <%= pattern.course_material.title %></span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <h4 class="font-medium text-gray-700 mb-1">Signal Phrases:</h4>
+                        <% if pattern.signal_phrases.present? %>
+                          <div class="flex flex-wrap gap-1">
+                            <% pattern.signal_phrases.first(3).each do |phrase| %>
+                              <span class="inline-block px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                                "<%= phrase %>"
+                              </span>
+                            <% end %>
+                            <% if pattern.signal_phrases.count > 3 %>
+                              <span class="text-xs text-gray-500">
+                                +<%= pattern.signal_phrases.count - 3 %> more
+                              </span>
+                            <% end %>
+                          </div>
+                        <% else %>
+                          <span class="text-gray-500 italic">None defined</span>
+                        <% end %>
+                      </div>
+                      
+                      <div>
+                        <h4 class="font-medium text-gray-700 mb-1">Follow-ups:</h4>
+                        <% if pattern.recommended_followups.present? %>
+                          <span class="text-gray-600"><%= pattern.recommended_followups.count %> recommendations</span>
+                        <% else %>
+                          <span class="text-gray-500 italic">None defined</span>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="ml-4">
+                    <%= link_to "View Details", 
+                                instructor_course_material_misconception_pattern_path(pattern.course_material, pattern),
+                                class: "text-blue-600 hover:text-blue-500 text-sm font-medium" %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Pagination -->
+          <% if @misconception_patterns.respond_to?(:current_page) && @misconception_patterns.total_pages > 1 %>
+            <div class="mt-6 flex justify-center">
+              <%= paginate @misconception_patterns, theme: 'twitter_bootstrap_4' %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+              <path d="M8 14v20c0 4.418 7.163 8 16 8 1.381 0 2.721-.087 4-.252M8 14c0 4.418 7.163 8 16 8s16-3.582 16-8M8 14c0-4.418 7.163-8 16-8s16 3.582 16 8m0 0v14m-16-4c1.381 0 2.721-.087 4-.252"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No misconception patterns found</h3>
+            <p class="mt-1 text-sm text-gray-500">
+              <% if @course_material %>
+                No patterns have been created for <%= @course_material.title %> yet.
+              <% else %>
+                No misconception patterns have been created across all course materials yet.
+              <% end %>
+            </p>
+            <div class="mt-6">
+              <% if @course_material %>
+                <%= link_to "Create Pattern for #{@course_material.title}", 
+                            instructor_course_material_misconception_patterns_path(@course_material),
+                            class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+              <% else %>
+                <p class="text-sm text-gray-500">Select a course material above to start creating patterns.</p>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

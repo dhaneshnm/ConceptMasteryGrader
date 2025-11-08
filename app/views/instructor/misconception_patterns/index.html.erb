@@ -1,0 +1,117 @@
+<!-- Instructor Misconception Patterns Management View -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex">
+          <div class="flex-shrink-0 flex items-center">
+            <%= link_to "← Dashboard", instructor_dashboard_index_path, class: "text-blue-600 hover:text-blue-800 mr-2" %>
+            <span class="text-gray-400 mr-2">|</span>
+            <%= link_to "All Misconceptions", misconceptions_instructor_dashboard_index_path, class: "text-blue-600 hover:text-blue-800 mr-4" %>
+            <h1 class="text-xl font-semibold text-gray-900">
+              Misconception Patterns for <%= @course_material.title %>
+            </h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Actions Bar -->
+    <div class="bg-white shadow rounded-lg mb-6">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <!-- Detection Actions -->
+          <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <div id="detection_status">
+              <%= button_to "Detect Patterns from Conversations", 
+                            detect_from_conversations_instructor_course_material_misconception_patterns_path(@course_material),
+                            method: :post,
+                            class: "bg-purple-600 text-white px-4 py-2 rounded-md text-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500",
+                            form: { data: { turbo: true } } %>
+            </div>
+            
+            <!-- Add Pattern Toggle -->
+            <button type="button" 
+                    onclick="document.getElementById('new_pattern_form').classList.toggle('hidden')"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              Add New Pattern
+            </button>
+          </div>
+          
+          <!-- Pattern Count -->
+          <div class="mt-3 sm:mt-0">
+            <span class="text-sm text-gray-500">
+              <%= @misconception_patterns.respond_to?(:total_count) ? @misconception_patterns.total_count : @misconception_patterns.count %> patterns total
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Pattern Form (Initially Hidden) -->
+    <div id="new_pattern_form" class="hidden bg-white shadow rounded-lg mb-6">
+      <div class="px-4 py-5 sm:p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Add New Misconception Pattern</h3>
+        <%= render 'form', misconception_pattern: @new_pattern, course_material: @course_material %>
+      </div>
+    </div>
+
+    <!-- Patterns List -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-medium text-gray-900">
+            Misconception Patterns 
+            <span class="text-sm text-gray-500">
+              (<%= @misconception_patterns.respond_to?(:total_count) ? @misconception_patterns.total_count : @misconception_patterns.count %> total)
+            </span>
+          </h2>
+          <% if @misconception_patterns.respond_to?(:offset_value) && @misconception_patterns.respond_to?(:limit_value) %>
+            <div class="text-sm text-gray-500">
+              Showing <%= @misconception_patterns.offset_value + 1 %>-<%= [@misconception_patterns.offset_value + @misconception_patterns.limit_value, @misconception_patterns.total_count].min %> of <%= @misconception_patterns.total_count %>
+            </div>
+          <% end %>
+        </div>
+
+        <% if @misconception_patterns.any? %>
+          <div class="space-y-4" id="misconception_patterns_list">
+            <% @misconception_patterns.each do |pattern| %>
+              <%= render 'pattern', pattern: pattern %>
+            <% end %>
+          </div>
+
+          <!-- Pagination -->
+          <% if @misconception_patterns.respond_to?(:current_page) && @misconception_patterns.total_pages > 1 %>
+            <div class="mt-6 flex justify-center">
+              <%= paginate @misconception_patterns, theme: 'twitter_bootstrap_4' %>
+            </div>
+          <% end %>
+        <% else %>
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+              <path d="M20 20a8 8 0 1 1 16 0 8 8 0 0 1-16 0zm20.485 1.515l-5.657 5.657"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No misconception patterns yet</h3>
+            <p class="mt-1 text-sm text-gray-500">
+              Get started by adding a pattern manually or detecting patterns from existing conversations.
+            </p>
+            <div class="mt-6 flex justify-center space-x-4">
+              <button type="button" 
+                      onclick="document.getElementById('new_pattern_form').classList.remove('hidden')"
+                      class="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700">
+                Add Pattern
+              </button>
+              <%= button_to "Detect from Conversations", 
+                            detect_from_conversations_instructor_course_material_misconception_patterns_path(@course_material),
+                            method: :post,
+                            class: "bg-purple-600 text-white px-4 py-2 rounded-md text-sm hover:bg-purple-700" %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

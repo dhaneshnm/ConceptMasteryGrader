@@ -1,0 +1,146 @@
+<!-- Show Misconception Pattern -->
+<div class="min-h-screen bg-gray-50">
+  <!-- Navigation -->
+  <nav class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex">
+          <div class="flex-shrink-0 flex items-center">
+            <%= link_to "← Dashboard", instructor_dashboard_index_path, class: "text-blue-600 hover:text-blue-800 mr-2" %>
+            <span class="text-gray-400 mr-2">|</span>
+            <%= link_to "All Misconceptions", misconceptions_instructor_dashboard_index_path, class: "text-blue-600 hover:text-blue-800 mr-2" %>
+            <span class="text-gray-400 mr-2">|</span>
+            <%= link_to "Back to Patterns", 
+                        instructor_course_material_misconception_patterns_path(@course_material), 
+                        class: "text-blue-600 hover:text-blue-800 mr-4" %>
+            <h1 class="text-xl font-semibold text-gray-900">
+              <%= @misconception_pattern.name %>
+            </h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <!-- Pattern Details -->
+        <div class="space-y-6">
+          <!-- Header Info -->
+          <div class="border-b border-gray-200 pb-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-2xl font-bold text-gray-900"><%= @misconception_pattern.name %></h2>
+                <p class="text-sm text-gray-600 mt-1">
+                  <strong>Concept:</strong> <%= @misconception_pattern.concept %>
+                </p>
+              </div>
+              <div class="flex items-center space-x-3">
+                <% if @misconception_pattern.severity.present? %>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                               <%= case @misconception_pattern.severity&.downcase
+                                   when 'high' then 'bg-red-100 text-red-800'
+                                   when 'medium' then 'bg-yellow-100 text-yellow-800'
+                                   when 'low' then 'bg-blue-100 text-blue-800'
+                                   else 'bg-gray-100 text-gray-800'
+                                   end %>">
+                    <%= @misconception_pattern.severity&.titleize || 'Medium' %> Severity
+                  </span>
+                <% end %>
+                
+                <%= link_to "Edit", 
+                            edit_instructor_course_material_misconception_pattern_path(@course_material, @misconception_pattern),
+                            class: "bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Signal Phrases -->
+          <div>
+            <h3 class="text-lg font-medium text-gray-900 mb-3">Signal Phrases</h3>
+            <p class="text-sm text-gray-600 mb-4">
+              These phrases indicate when a student might have this misconception:
+            </p>
+            
+            <% if @misconception_pattern.signal_phrases.present? %>
+              <div class="bg-gray-50 rounded-lg p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <% @misconception_pattern.signal_phrases.each do |phrase| %>
+                    <div class="flex items-center space-x-2">
+                      <span class="text-red-500">•</span>
+                      <span class="text-gray-800">"<%= phrase %>"</span>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% else %>
+              <p class="text-gray-500 italic">No signal phrases defined</p>
+            <% end %>
+          </div>
+
+          <!-- Recommended Follow-ups -->
+          <div>
+            <h3 class="text-lg font-medium text-gray-900 mb-3">Recommended Follow-up Questions</h3>
+            <p class="text-sm text-gray-600 mb-4">
+              Suggested questions to help students overcome this misconception:
+            </p>
+            
+            <% if @misconception_pattern.recommended_followups.present? %>
+              <div class="bg-blue-50 rounded-lg p-4">
+                <div class="space-y-3">
+                  <% @misconception_pattern.recommended_followups.each_with_index do |followup, index| %>
+                    <div class="flex items-start space-x-3">
+                      <span class="inline-flex items-center justify-center w-6 h-6 bg-blue-600 text-white text-xs rounded-full mt-0.5">
+                        <%= index + 1 %>
+                      </span>
+                      <p class="text-gray-800 flex-1"><%= followup %></p>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            <% else %>
+              <p class="text-gray-500 italic">No follow-up recommendations defined</p>
+            <% end %>
+          </div>
+
+          <!-- Usage Statistics (Placeholder) -->
+          <div>
+            <h3 class="text-lg font-medium text-gray-900 mb-3">Usage Statistics</h3>
+            <div class="bg-gray-50 rounded-lg p-4">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-blue-600">-</div>
+                  <div class="text-sm text-gray-600">Times Detected</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-green-600">-</div>
+                  <div class="text-sm text-gray-600">Successful Interventions</div>
+                </div>
+                <div class="text-center">
+                  <div class="text-2xl font-bold text-purple-600">-</div>
+                  <div class="text-sm text-gray-600">Follow-ups Used</div>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 text-center mt-3">
+                Statistics will be available once this pattern starts being used in evaluations.
+              </p>
+            </div>
+          </div>
+
+          <!-- Metadata -->
+          <div class="border-t border-gray-200 pt-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-500">
+              <div>
+                <strong>Created:</strong> <%= @misconception_pattern.created_at.strftime("%B %d, %Y at %I:%M %p") %>
+              </div>
+              <div>
+                <strong>Last Updated:</strong> <%= @misconception_pattern.updated_at.strftime("%B %d, %Y at %I:%M %p") %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -97,7 +97,8 @@ class ConversationEvaluationJob < ApplicationJob
     return unless grade_report
     
     # Auto-generate instructor notifications for low scores
-    if grade_report.overall_score < 0.5 && options[:notify_instructor]
+    overall_score = grade_report.overall_score || 0.0
+    if overall_score < 0.5 && options[:notify_instructor]
       InstructorNotificationJob.perform_later(
         conversation.id,
         type: "low_performance",
@@ -114,7 +115,13 @@ class ConversationEvaluationJob < ApplicationJob
     end
     
     # Generate suggested follow-up questions for instructor
-    if grade_report.detailed_scores.values.any? { |score| score[:score] < 0.6 }
+    detailed_scores = grade_report.detailed_scores || {}
+    has_low_scores = detailed_scores.values.any? do |score_data|
+      score_value = score_data&.[]("score") || 0.0
+      score_value < 0.6
+    end
+    
+    if has_low_scores
       FollowUpSuggestionJob.perform_later(conversation.id, grade_report.id)
     end
     

@@ -86,6 +86,8 @@ class GradeReport < ApplicationRecord
   
   # Get detailed scores for each concept (formatted for UI display)
   def detailed_scores
+    return {} if scores.blank?
+    
     scores.transform_values do |level|
       {
         'level' => level,

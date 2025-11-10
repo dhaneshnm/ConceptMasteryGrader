@@ -527,12 +527,17 @@ class Grading::EvaluateConversation
     
     known_misconceptions.each do |pattern|
       user_messages.each do |message|
-        if message.content.downcase.include?(pattern.pattern.downcase)
-          matched << {
-            pattern_id: pattern.id,
-            description: pattern.description,
-            matched_in: message.content.truncate(100)
-          }
+        # Check if any signal phrases match the message content
+        pattern.signal_phrases.each do |signal_phrase|
+          if message.content.downcase.include?(signal_phrase.downcase)
+            matched << {
+              pattern_id: pattern.id,
+              description: pattern.name,
+              signal_phrase: signal_phrase,
+              matched_in: message.content.truncate(100)
+            }
+            break # Only record one match per pattern per message
+          end
         end
       end
     end

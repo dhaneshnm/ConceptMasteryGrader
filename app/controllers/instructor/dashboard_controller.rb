@@ -216,8 +216,9 @@ class Instructor::DashboardController < Instructor::BaseController
     patterns.each do |pattern|
       # Count how often this pattern appears in evaluations
       # This is a simplified count - in production you'd track actual matches
-      frequency_data[pattern.pattern] = {
-        description: pattern.description,
+      frequency_data[pattern.name] = {
+        description: pattern.name,
+        signal_phrases: pattern.signal_phrases,
         frequency: rand(1..10), # Placeholder - would be real frequency data
         severity: pattern.severity || 'medium'
       }

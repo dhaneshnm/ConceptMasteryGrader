@@ -38,15 +38,30 @@
       <div class="grid-responsive">
         <div class="card bg-neutral-50">
           <div class="p-6">
-            <h3 class="text-lg font-semibold text-neutral-800 mb-4">
-              File Information 
-              <span class="text-sm font-normal text-neutral-600">
-                (<%= @course_material.files.count %> file<%= 's' if @course_material.files.count != 1 %>)
-              </span>
-            </h3>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-neutral-800">
+                File Information 
+                <span class="text-sm font-normal text-neutral-600">
+                  (<%= @course_material.files.count %> file<%= 's' if @course_material.files.count != 1 %>)
+                </span>
+              </h3>
+              <% if @course_material.files.attached? && @course_material.files.any? %>
+                <button 
+                  id="toggle-files-btn" 
+                  onclick="toggleFilesList()"
+                  class="flex items-center space-x-2 text-neutral-600 hover:text-neutral-800 transition-colors"
+                  aria-label="Toggle files list"
+                >
+                  <span id="toggle-text">Collapse</span>
+                  <svg id="toggle-icon" class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </button>
+              <% end %>
+            </div>
             
             <% if @course_material.files.attached? && @course_material.files.any? %>
-              <div class="space-y-4">
+              <div id="files-list" class="space-y-4">
                 <% @course_material.files.each_with_index do |file, index| %>
                   <div class="border border-neutral-200 rounded-lg p-4 bg-white">
                     <div class="flex items-start justify-between">
@@ -142,9 +157,6 @@
           
           <%= link_to "Manage Summaries", [@course_material, :summaries], 
               class: "bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>
-          
-          <%= link_to "Start Evaluation", "#", 
-              class: "bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" %>
         </div>
       <% end %>
     </div>
@@ -212,3 +224,23 @@
     end
   %>
 <% end %>
+
+<script>
+  function toggleFilesList() {
+    const filesList = document.getElementById('files-list');
+    const toggleIcon = document.getElementById('toggle-icon');
+    const toggleText = document.getElementById('toggle-text');
+    
+    if (filesList.style.display === 'none') {
+      // Expand
+      filesList.style.display = 'block';
+      toggleIcon.style.transform = 'rotate(0deg)';
+      toggleText.textContent = 'Collapse';
+    } else {
+      // Collapse
+      filesList.style.display = 'none';
+      toggleIcon.style.transform = 'rotate(-90deg)';
+      toggleText.textContent = 'Expand';
+    }
+  }
+</script>

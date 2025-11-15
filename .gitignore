@@ -296,7 +296,8 @@ yarn-debug.log*
 /spring/*.pid
 
 # Ignore importmap cache
-/app/assets/builds/
+# Ignore importmap cache (already handled above)
+# /app/assets/builds/
 
 # Ignore Kamal secrets
 .kamal/secrets*

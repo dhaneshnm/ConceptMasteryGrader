@@ -43,10 +43,6 @@ ActiveRecord::Schema[8.1].define(version: 2025_11_07_224234) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
-# Could not dump table "chunks" because of following StandardError
-#   Unknown type 'vector(1536)' for column 'embedding'
-
-
   create_table "conversations", force: :cascade do |t|
     t.bigint "course_material_id", null: false
     t.datetime "created_at", null: false

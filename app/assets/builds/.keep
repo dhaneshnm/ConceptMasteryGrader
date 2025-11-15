@@ -1,0 +1,1 @@
+# Ensure Git keeps the Tailwind build directory so propshaft can serve compiled CSS.
